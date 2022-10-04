@@ -17,7 +17,8 @@ class SeriesIterator:
             try:
                 self.child_iterators.append(iter(c))
             except TypeError:  # if c doesn't define an `__iter__` method, `iter(c)` returns a TypeError
-                self.child_iterators.append(iter([((c.key,), c)]))
+                key = getattr(c, 'key', None)
+                self.child_iterators.append(iter([((key,), c)]))
         self.iterators = chain.from_iterable(self.child_iterators)
     
     def __next__(self):
