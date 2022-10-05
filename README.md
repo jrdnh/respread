@@ -72,4 +72,22 @@ Output:
 333.3390763519405
 [('my_account.period_starting_balance', 330.03868945736684), ('my_account.accrued_amount', 3.3003868945736685), ('my_account.period_ending_balance', 333.3390763519405)]
 ```
-Caches are on a per-`Series` basis which means that each instance of `Account` class have its own cache for each wrapped function. Placing a `Series` in a context manager will clear any cached children functions on both entry and exit. 
+Caches are on a per-`Series` basis which means that each instance of `Account` class have its own cache for each wrapped function. Placing a `Series` in a context manager will clear any cached children functions on both entry and exit.
+
+```python
+acct_a = Account(key='a')
+acct_b = Account(key='b')
+
+with acct_a as a:
+    _ = a(100)
+    print(f'acct_a cache info: {a.period_starting_balance.cache_info()}')
+    print(f'acct_b cache info: {acct_b.period_starting_balance.cache_info()}')
+
+print(f'acct_a cache info after exit: {acct_a.period_starting_balance.cache_info()}')
+```
+Output:
+```python
+acct_a cache info: CacheInfo(hits=102, misses=101, maxsize=None, currsize=101)
+acct_b cache info: CacheInfo(hits=0, misses=0, maxsize=None, currsize=0)
+acct_a cache info after exit: CacheInfo(hits=0, misses=0, maxsize=None, currsize=0)
+```
