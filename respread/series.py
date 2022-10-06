@@ -156,7 +156,7 @@ class Series:
                 if child.key == key:
                     if isinstance(value, MethodType):
                         func = value.__func__
-                        copied_value = func.type(func.__wrapped__, key).bind(self)
+                        copied_value = func.factory(func.__wrapped__, key).bind(self)
                     else:
                         copied_value = deepcopy(value)
                         copied_value.key = key
@@ -169,7 +169,7 @@ class Series:
             if not key_matched:
                 if isinstance(value, MethodType):
                     func = value.__func__
-                    copied_value = func.factory.bind(self)
+                    copied_value = func.factory(func.__wrapped__, key).bind(self)
                 else:
                     copied_value = deepcopy(value)
                     copied_value.key = key
@@ -339,12 +339,12 @@ class cached_series:
         return self
     
     def bind(self, obj):
-            cached_func = cache(self.func)
-            cached_func.id = id(self)
-            cached_func.key = self.key
-            cached_func.factory = self
-            cached_method = MethodType(cached_func, obj)
-            return cached_method
+        cached_func = cache(self.func)
+        cached_func.id = id(self)
+        cached_func.key = self.key
+        cached_func.factory = self
+        cached_method = MethodType(cached_func, obj)
+        return cached_method
     
     @classmethod
     def series_sum(cls, series: List[str]):

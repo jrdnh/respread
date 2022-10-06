@@ -50,28 +50,31 @@ from respread import cached_series
 
 class Account(Series):
     @cached_series
-    def period_starting_balance(self, period):
-        return 100 if period <= 0 else self.period_ending_balance(period - 1)
+    def starting_balance(self, period):
+        return 100 if period <= 0 else self.ending_balance(period - 1)
     
     @cached_series
-    def accrued_amount(self, period):
-        return self.period_starting_balance(period) * 0.01
+    def accrual(self, period):
+        return self.starting_balance(period) * 0.01
     
     @cached_series
-    def period_ending_balance(self, period):
-        return self.period_starting_balance(period) + self.accrued_amount(period)
+    def ending_balance(self, period):
+        return self.starting_balance(period) + self.accrual(period)
 
 acct = Account(key='my_account')
 acct(120)
-acct.period_ending_balance(120)
+acct.ending_balance(120)
+acct['ending_balance'](120)
 acct.items(120)
 ```
 Output:
 ```python
 [330.03868945736684, 3.3003868945736685, 333.3390763519405]
 333.3390763519405
+333.3390763519405
 [('my_account.period_starting_balance', 330.03868945736684), ('my_account.accrued_amount', 3.3003868945736685), ('my_account.period_ending_balance', 333.3390763519405)]
 ```
+
 Caches are on a per-`Series` basis which means that each instance of `Account` class have its own cache for each wrapped function. Placing a `Series` in a context manager will clear any cached children functions on both entry and exit.
 
 ```python
@@ -91,3 +94,15 @@ acct_a cache info: CacheInfo(hits=102, misses=101, maxsize=None, currsize=101)
 acct_b cache info: CacheInfo(hits=0, misses=0, maxsize=None, currsize=0)
 acct_a cache info after exit: CacheInfo(hits=0, misses=0, maxsize=None, currsize=0)
 ```
+
+### Detailed description of `cached_series`
+
+`cached_series` is a data descriptor that must be initialized with a function. When it's `__get__` method is called, it will try to get the first matching function from the calling object's list of `.children`. If the calling object doesn't have a `.children` attribute (for example, it isn't a `Series` object), the `cached_series` will return itself. If the calling object does have a `.children` list but the the list doesn't have a matching function, the `cached_series` will return a `MethodType` bound to the calling object and wrapped in a `functools.cache`.
+
+Durinig initialization, `Series` objects will call any `cached_series` attributes. This means that their `.children` list will contain all bound and cached methods from the class definition. Accessing wrapped methods using dot notation will return the object stored in the `.children` list (unless the list is modified).
+
+The order that methods appear in `.children` follows the order of class definition and the MRO for any subclasses. You can specify the order 
+
+
+
+[If wrap with MethodType and then cache, does that help at all?]
