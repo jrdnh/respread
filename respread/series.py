@@ -8,22 +8,34 @@ from typing import Any, Callable, List
 
 class SeriesIterator:
     """
-    Eagerly builds chained iterators returning `((parent.key, child.key), <method_series>)`
+    Builds chained iterators returning `((first_child_key, second_child_key, ...), leaf_callable)`.
+    The iterator chain is built eagerly (adding or removing items from the Series will not add or 
+    remove items from the iterator), but callables are evaluated lazily.
     """
     def __init__(self, series) -> None:
-        self.key = series.key
+    #     self.child_iterators = []
+    #     for k, c in series.children.items():
+    #         try:
+    #             self.child_iterators.append(iter(c))
+    #         except TypeError:  # if c doesn't define an `__iter__` method, `iter(c)` returns a TypeError
+    #             self.child_iterators.append(iter([((k,), c)]))
+    #     self.iterators = chain.from_iterable(self.child_iterators)
+    
+    # def __next__(self):
+    #     v = next(self.iterators)
+    #     return ((*v[0],), v[1])
         self.child_iterators = []
-        for c in series.children:
+        for k, c in series.children.items():
             try:
-                self.child_iterators.append(iter(c))
-            except TypeError:  # if c doesn't define an `__iter__` method, `iter(c)` returns a TypeError
-                key = getattr(c, 'key', None)
-                self.child_iterators.append(iter([((key,), c)]))
-        self.iterators = chain.from_iterable(self.child_iterators)
+                sub_children = list(iter(c))  # if c doesn't define an `__iter__` method, `iter(c)` returns a TypeError
+                for (sub_k, sub_c) in sub_children:  # will raise a TypeError or ValueError if can't unpact (depending in element is too short/not unpackable or too long)
+                    self.child_iterators.append(((k, *sub_k), sub_c))
+            except TypeError:
+                self.child_iterators.append(((k,), c))
+        self.iterator = iter(self.child_iterators)
     
     def __next__(self):
-        v = next(self.iterators)
-        return ((self.key, *v[0]), v[1])
+        return next(self.iterator)
     
     def __iter__(self):
         return self
@@ -62,23 +74,22 @@ def _parse_key(key):
 
 class Series:
     
-    _internal_names: list[str] = ['children', 'id', 'key', 'parent']
+    _internal_names: list[str] = ['children', 'id', 'parent']
     
-    def __init__(self, key: str = None) -> None:
-        self.children = []
+    def __init__(self) -> None:
+        self.children = {}
         self.id = id(self)
-        self.key = key
         self.parent = None
         self._init_funcs()
     
     def _init_funcs(self):
-        """Add series methods to children array"""
+        """Add series methods to children dict"""
         bases = type(self).__mro__
         
         for base in bases:
             for attr in base.__dict__.values():
                 if hasattr(attr, 'is_series'):
-                    self.children.append(attr.bind(self))
+                    self.children[attr.key] = attr.bind(self)
     
     def __call__(self, *args, **kwds):
         # return SeriesCallIterator(children_iterator, *args, **kwargs)
@@ -118,25 +129,23 @@ class Series:
             print(rep + 'children: None')
         if num_children == 1:
             rep = rep + 'child:'
-            child = self.children[0]
-            print(rep + f'\n{str(child.key)}: {type(child)}')
+            key, child = self.children.items()
+            print(rep + f'\n{str(key)}: {type(child)}')
         else:
             rep = rep + 'children:'
-            for child in self.children:
-                rep = rep + f'\n{str(child.key)}: {type(child)}'
+            for key, child in self.children.items():
+                rep = rep + f'\n{str(key)}: {type(child)}'
             print(rep)
     
     # Getting attributes/children
     def __getitem__(self, key):
         parsed_keys = _parse_key(key)[0]
-        matching_children = [child for child in self.children if child.key in parsed_keys]
+        matching_children = [child for key, child in self.children.items() if key in parsed_keys]
         if len(matching_children) == 0:
             raise KeyError(f"'{type(self).__qualname__} object does not have child with key '{key}'")
         if len(matching_children) == 1:
             return matching_children[0]
-        new_series = Series()
-        new_series.children = matching_children
-        return new_series
+        return matching_children
     
     def __setitem__(self, key, value):
         """Currently limited to setting items at first child level"""
@@ -149,8 +158,17 @@ class Series:
         
         parsed_keys = _parse_key(key)[0]
         
+        if isinstance(value, MethodType):
+            func = value.__func__
+            copied_value = func.factory(func.__wrapped__, key).bind(self)
+        else:
+            copied_value = deepcopy(value)
+            copied_value.parent = self
+        
+        self.children.update({key: copied_value})
+        
         for key in parsed_keys:
-            # replace all children with matching keys
+            # replace all children with matching keys            
             key_matched = False
             for index, child in enumerate(self.children):
                 if child.key == key:
@@ -178,17 +196,7 @@ class Series:
     
     def __delitem__(self, key):
         """Raises key error if key does not exist"""
-        indexes_to_delete = []
-        
-        for index, child in enumerate(self.children):
-            if child.key in key:
-                indexes_to_delete.append(index)
-        
-        if len(indexes_to_delete) == 0:
-            raise KeyError(f'{key}')
-        
-        for i in indexes_to_delete:
-            del self.children[i]
+        del self.children[key]
     
     def __deepcopy__(self, memo=None):
         deepcopy_func = self.__deepcopy__.__func__
@@ -197,15 +205,13 @@ class Series:
         copy.__deepcopy__ = MethodType(deepcopy_func, copy)
         
         # methods are not copied by deepcopy, manually replace
-        for index, item in enumerate(copy.children):
+        for key, item in copy.children:
             if isinstance(item, MethodType):
                 func = item.__func__
                 new_func_series = func.factory.bind(copy)
-                copy.children.pop(index)
-                copy.children.insert(index, new_func_series)
+                copy.children.update({key, new_func_series})
         
         return copy
-        
     
     def __getattr__(self, name: str):
         """
@@ -232,7 +238,9 @@ class Series:
     
     def __setattr__(self, name: str, value: Any) -> None:
         """
-        After regular attribute access, try setting the name for children with matching keys
+        After regular attribute access, try setting the name for children with matching keys.
+        Only sets objects that identify as series to children (`Series` class or `.is_series == True`)
+        so that attributes can still be added to `self.__dict__`
         This allows simpler access to children for interactive use.
         """
         # this pattern mirrors pandas
@@ -272,7 +280,7 @@ class Series:
             filter = lambda s: isinstance(s, MethodType)
         series = []
         
-        for child in self.children:
+        for child in self.children.values():
             if filter(child):
                 series.append(child)
             if getattr(child, 'sub_series', False):
@@ -284,10 +292,10 @@ class Series:
         return self.root().sub_series(filter=filter)
     
     # Manage caches
-    def clear_cache(self, only_node=False):
+    def clear_cache(self, node_only=False):
         """Clear cached function values in either the entire tree or only the node and node's children"""
-        if not only_node:
-            self.root().clear_cache(only_node=True)
+        if not node_only:
+            self.root().clear_cache(node_only=True)
         else:
             method_children = self.sub_series(lambda s: isinstance(s, MethodType))
             for child in method_children:
@@ -297,13 +305,13 @@ class Series:
                     pass
     
     def __enter__(self):
-        self.clear_cache(only_node=False)
+        self.clear_cache(node_only=False)
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             return False
-        self.clear_cache(only_node=False)
+        self.clear_cache(node_only=False)
         return True
 
 
@@ -341,7 +349,6 @@ class cached_series:
     def bind(self, obj):
         cached_func = cache(self.func)
         cached_func.id = id(self)
-        cached_func.key = self.key
         cached_func.factory = self
         cached_method = MethodType(cached_func, obj)
         return cached_method
