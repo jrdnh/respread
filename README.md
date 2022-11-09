@@ -77,9 +77,9 @@ acct = Account(initial_balance=100, interest_rate=0.01)
 print(acct.children)
 print(acct.items(120))
 ```
+Output:
 ```python
 {'starting_balance': <bound method Account.starting_balance of <__main__.Account object at 0x10dd53460>>, 'accrual': <bound method Account.accrual of <__main__.Account object at 0x10dd53460>>, 'ending_balance': <bound method Account.ending_balance of <__main__.Account object at 0x10dd53460>>}
-
 [('starting_balance', 330.03868945736684), ('accrual', 3.3003868945736685), ('ending_balance', 333.3390763519405)]
 ```
 
