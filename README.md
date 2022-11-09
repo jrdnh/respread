@@ -105,7 +105,7 @@ acct_a cache info after exit: CacheInfo(hits=0, misses=0, maxsize=None, currsize
 
 ### Detailed description of `cached_series`
 
-`cached_series` is a data descriptor that must be initialized with a function. When its `__get__` method is called, it will try to get the first matching function from the calling object's `.children` dictionary. If the calling object doesn't have a `.children` attribute (for example, it isn't a `Series` object), the `cached_series` will return itself. If the calling object does have a `.children` list but the the list doesn't have a matching function, the `cached_series` will return a `MethodType` bound to the calling object and wrapped in `functools.cache`.
+`cached_series` is a descriptor that must be initialized with a function. When its `__get__` method is called, it will try to get the first matching function from the calling object's `.children` dictionary. If the calling object doesn't have a `.children` attribute (for example, it isn't a `Series` object), the `cached_series` will return itself. If the calling object does have a `.children` list but the the list doesn't have a matching function, the `cached_series` will return a `MethodType` bound to the calling object and wrapped in `functools.cache`.
 
 Durinig initialization, `Series` objects will call any `cached_series` attributes in the class definition. This means that an instance's `.children` dictionary will contain all bound and cached methods from the class definition. Accessing wrapped methods using dot notation will return the object stored in the `.children` dictionary (unless it was removed from the dictionary, in which case it will build and return a new bound and cached method).
 
