@@ -55,7 +55,7 @@ Functions built by the `cached_series` decorator use functool's `cache` wrapper 
 from respread import cached_series
 
 class Account(Series):
-
+    
     def __init__(self, initial_balance, interest_rate):
         super().__init__()
         self.initial_balance = initial_balance

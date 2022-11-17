@@ -1,7 +1,6 @@
 from __future__ import annotations
 from copy import deepcopy
 from functools import cache
-from itertools import chain
 from types import MethodType
 from typing import Any, Callable, List
 
@@ -13,17 +12,6 @@ class SeriesIterator:
     remove items from the iterator), but callables are evaluated lazily.
     """
     def __init__(self, series) -> None:
-    #     self.child_iterators = []
-    #     for k, c in series.children.items():
-    #         try:
-    #             self.child_iterators.append(iter(c))
-    #         except TypeError:  # if c doesn't define an `__iter__` method, `iter(c)` returns a TypeError
-    #             self.child_iterators.append(iter([((k,), c)]))
-    #     self.iterators = chain.from_iterable(self.child_iterators)
-    
-    # def __next__(self):
-    #     v = next(self.iterators)
-    #     return ((*v[0],), v[1])
         self.child_iterators = []
         for k, c in series.children.items():
             try:
@@ -39,37 +27,6 @@ class SeriesIterator:
     
     def __iter__(self):
         return self
-
-
-def _get_sub_items(key):
-    if isinstance(key, str):
-        return [key]
-    
-    try:
-        items = []
-        length = key.__len__()
-        for i in range(0, length):
-            items.append(key[i])
-        return items
-    except AttributeError:
-        return [key]
-
-
-def _parse_key(key):
-    if isinstance(key, str):
-        return [[key]]
-    
-    # first level
-    try:
-        items = []
-        length = key.__len__()
-        for i in range(0, length):
-            items.append(_get_sub_items(key[i]))
-            
-    except AttributeError:
-        return [[key]]
-    
-    return items
 
 
 class Series:
@@ -139,8 +96,7 @@ class Series:
     
     # Getting attributes/children
     def __getitem__(self, key):
-        parsed_keys = _parse_key(key)[0]
-        matching_children = [child for key, child in self.children.items() if key in parsed_keys]
+        matching_children = [child for key, child in self.children.items() if key == key]
         if len(matching_children) == 0:
             raise KeyError(f"'{type(self).__qualname__} object does not have child with key '{key}'")
         if len(matching_children) == 1:
@@ -148,7 +104,6 @@ class Series:
         return matching_children
     
     def __setitem__(self, key, value):
-        """Currently limited to setting items at first child level"""
         if value is None:
             try:
                 self.__delitem__(key)
@@ -156,43 +111,17 @@ class Series:
             except KeyError:
                 pass
         
-        parsed_keys = _parse_key(key)[0]
-        
         if isinstance(value, MethodType):
             func = value.__func__
-            copied_value = func.factory(func.__wrapped__, key).bind(self)
+            try:
+                copied_value = func.factory(func.__wrapped__, key).bind(self)
+            except:
+                copied_value = MethodType(func, self)
         else:
             copied_value = deepcopy(value)
             copied_value.parent = self
         
         self.children.update({key: copied_value})
-        
-        for key in parsed_keys:
-            # replace all children with matching keys            
-            key_matched = False
-            for index, child in enumerate(self.children):
-                if child.key == key:
-                    if isinstance(value, MethodType):
-                        func = value.__func__
-                        copied_value = func.factory(func.__wrapped__, key).bind(self)
-                    else:
-                        copied_value = deepcopy(value)
-                        copied_value.key = key
-                        copied_value.parent = self
-                    self.children.pop(index)
-                    self.children.insert(index, copied_value)
-                    key_matched = True
-            
-            # add if no children with matching key
-            if not key_matched:
-                if isinstance(value, MethodType):
-                    func = value.__func__
-                    copied_value = func.factory(func.__wrapped__, key).bind(self)
-                else:
-                    copied_value = deepcopy(value)
-                    copied_value.key = key
-                    copied_value.parent = self
-                self.children.append(copied_value)
     
     def __delitem__(self, key):
         """Raises key error if key does not exist"""
@@ -204,11 +133,14 @@ class Series:
         copy = deepcopy(self, memo)
         copy.__deepcopy__ = MethodType(deepcopy_func, copy)
         
-        # methods are not copied by deepcopy, manually replace
+        # methods are not copied by deepcopy, manually replace and bind to self
         for key, item in copy.children:
             if isinstance(item, MethodType):
                 func = item.__func__
-                new_func_series = func.factory.bind(copy)
+                try:
+                    new_func_series = func.factory.bind(copy)
+                except AttributeError:
+                    new_func_series = func
                 copy.children.update({key, new_func_series})
         
         return copy
