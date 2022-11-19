@@ -2,7 +2,10 @@ from __future__ import annotations
 from copy import deepcopy
 from functools import cache
 from types import MethodType
-from typing import Any, Callable, List
+from typing import Any, Callable, List, TypeVar
+
+
+SeriesType = TypeVar('SeriesType', bound='Series')
 
 
 class SeriesIterator:
@@ -35,11 +38,10 @@ class Series:
     
     def __init__(self) -> None:
         self.children = {}
-        self.id = id(self)
         self.parent = None
-        self._init_funcs()
+        self._init_children()
     
-    def _init_funcs(self):
+    def _init_children(self):
         """Add series methods to children dict"""
         bases = type(self).__mro__
         
@@ -49,10 +51,9 @@ class Series:
                     self.children[attr.key] = attr.bind(self)
     
     def __call__(self, *args, **kwds):
-        # return SeriesCallIterator(children_iterator, *args, **kwargs)
         return [s[1](*args, **kwds) for s in iter(self)]
     
-    def names(self, full_path=True, sep='.'):
+    def names(self, full_path: bool = True, sep: str = '.'):
         """
         Keys of children method series as strings
         If keys are not strings, will try to convert using `str(key)`
@@ -72,56 +73,47 @@ class Series:
     def __iter__(self):
         return SeriesIterator(self)
     
-    def bind(self, new_parent, key=None):
+    def bind(self, new_parent: SeriesType) -> SeriesType:
+        """Copy and """
         copy = self.__deepcopy__()
         copy.parent = new_parent
-        if key is not None:
-            copy.key = key
         return copy
     
     def describe(self) -> str:
         num_children = len(self.children)
-        rep = f"{type(self).__qualname__} object '{str(self.key)}' {id(self)} with {num_children} "
+        rep = f"{type(self).__qualname__} object {id(self)} with {num_children} "
         if num_children == 0:
             print(rep + 'children: None')
         if num_children == 1:
             rep = rep + 'child:'
-            key, child = self.children.items()
-            print(rep + f'\n{str(key)}: {type(child)}')
         else:
             rep = rep + 'children:'
-            for key, child in self.children.items():
-                rep = rep + f'\n{str(key)}: {type(child)}'
-            print(rep)
+        for key, child in self.children.items():
+            rep = rep + f'\n{str(key)}: {type(child)}'
+        print(rep)
     
     # Getting attributes/children
     def __getitem__(self, key):
-        matching_children = [child for key, child in self.children.items() if key == key]
-        if len(matching_children) == 0:
+        try:
+            return self.children.get(key)
+        except KeyError:
             raise KeyError(f"'{type(self).__qualname__} object does not have child with key '{key}'")
-        if len(matching_children) == 1:
-            return matching_children[0]
-        return matching_children
     
     def __setitem__(self, key, value):
         if value is None:
-            try:
-                self.__delitem__(key)
-                return
-            except KeyError:
-                pass
+            self.__delitem__(key)
+        self.children.update({key: value})
+        # if isinstance(value, MethodType) and (value.__self__ == self):
+        #     func = value.__func__
+        #     try:
+        #         copied_value = func.factory(func.__wrapped__, key).bind(self)
+        #     except:
+        #         copied_value = MethodType(func, self)
+        # else:
+        #     copied_value = deepcopy(value)
+        #     copied_value.parent = self
         
-        if isinstance(value, MethodType):
-            func = value.__func__
-            try:
-                copied_value = func.factory(func.__wrapped__, key).bind(self)
-            except:
-                copied_value = MethodType(func, self)
-        else:
-            copied_value = deepcopy(value)
-            copied_value.parent = self
-        
-        self.children.update({key: copied_value})
+        # self.children.update({key: copied_value})
     
     def __delitem__(self, key):
         """Raises key error if key does not exist"""
@@ -134,13 +126,14 @@ class Series:
         copy.__deepcopy__ = MethodType(deepcopy_func, copy)
         
         # methods are not copied by deepcopy, manually replace and bind to self
-        for key, item in copy.children:
-            if isinstance(item, MethodType):
+        # if method's __self__ attr is self, rebind to the copy
+        for key, item in copy.children.items():
+            if isinstance(item, MethodType) and (item.__self__ == self):
                 func = item.__func__
                 try:
                     new_func_series = func.factory.bind(copy)
                 except AttributeError:
-                    new_func_series = func
+                    new_func_series = MethodType(func, copy)
                 copy.children.update({key, new_func_series})
         
         return copy
@@ -267,20 +260,19 @@ class cached_series:
         If `obj == None`, return self
         """
         if (obj is not None) and (hasattr(obj, 'children')):
-            for item in obj.children:
-                if getattr(item, 'id') == id(self):
+            for item in obj.children.values():
+                if getattr(item, 'series_id', None) == id(self):
                     return item
             
-            # If no object in the array has the matching id, create and append cached method
+            # If no object in the array has the matching id, create cached method
             cached_method = self.bind(obj)
-            obj.children.append(cached_method)
             return cached_method
         
         return self
     
     def bind(self, obj):
         cached_func = cache(self.func)
-        cached_func.id = id(self)
+        cached_func.series_id = id(self)
         cached_func.factory = self
         cached_method = MethodType(cached_func, obj)
         return cached_method
