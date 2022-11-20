@@ -11,9 +11,11 @@ pip install git+https://github.com/jordanhitchcock/respread.git
 ## Getting Started
 
 ### `Series`
-`Series` objects have a `.children` dictionary that holds key-value pairs where the values are callables. Calling a `Series` object calls each value in the dictionary with the same function variables that were passed to the `Series` and returns a list of responses. 
+`Series` objects arrange callables into logical groupings. `Series` are callables themselves, which means they can by nested into hierarchical structures. `Series` hold children callables as key-value pairs in their `children` dictionary attribute.
 
-Child callables are accessable i) directly from the `.children` dictionary (`my_series.children[key]`), ii) by `Series` object indexing (`my_series[key]`), or iii) by dot notation (`my_series.key`).
+The default return value of a `Series` is a list of return values generated from calling the `Series'`s children with the same arguments.
+
+Children callables are accessable *i)* by accessing the the `children` attribute directly (`my_series.children[key]`), *ii)* indexing the `Series` object (`my_series[key]`), or *iii)* by dot notation (`my_series.key`).)
 
 ```python
 from respread import Series
@@ -26,7 +28,7 @@ print(describe_list.has_none([1, 2, None]))
 ```
 Output:
 ```python
-[3, FALSE]
+[3, False]
 True
 ```
 Since `Series` are callables themselves, they can be nested in other `Series` creating a hierarchy of function groupings.
@@ -47,7 +49,7 @@ Output:
 
 ### `cached_series`
 
-`Series` instances will add any methods wrapped with the `cached_series` decorator to the `.children` dict at initialization. 
+`Series` instances will add any methods wrapped with the `cached_series` decorator to the `children` dict at initialization. 
 
 Functions built by the `cached_series` decorator use functool's `cache` wrapper to store values. Caching improves performance in many cases. It also minimizes the impact of Python's recursion limitaions by enabling iterative calculations. 
 
@@ -83,7 +85,7 @@ Output:
 [('starting_balance', 330.03868945736684), ('accrual', 3.3003868945736685), ('ending_balance', 333.3390763519405)]
 ```
 
-Caches are on a per-`Series` basis which means that each instance of `Account` has its own cache for each wrapped function. Placing a `Series` in a context manager will clear any cached children functions on both entry and exit.
+Caches are on a per-`Series` instance basis which means that each instance of `Account` has its own cache for each wrapped function. Placing a `Series` in a context manager will clear any cached children on both entry and exit.
 
 ```python
 acct_a = Account(100, 0.01)
