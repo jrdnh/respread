@@ -3,6 +3,18 @@ from datetime import date
 
 
 class Period:
+    """Date periods based on a reference date.
+    
+    Represents a date period based on a number of date offsets from a reference date.
+    The period start and end dates are calculated by adding (period_num * (freq - 1))
+    and (period_num * freq) to the reference start date.
+    `Period`s are comparable to numbers and dates.
+    
+    Attributes:
+        period: The period number
+        freq: Period frequency, or delta between periods
+        ref_date: The reference start date
+    """
     
     def __init__(self, period: int, ref_date: date, freq: relativedelta) -> None:
         self._period = None
@@ -12,6 +24,7 @@ class Period:
     
     @property
     def period(self):
+        """Period number"""
         return self._period
     
     @period.setter
@@ -24,10 +37,12 @@ class Period:
     # Methods
     @property
     def start(self) -> date:
+        """Period start date"""
         return self.ref_date + self.freq * (self.period - 1)
     
     @property
     def end(self) -> date:
+        """Period end date"""
         return self.ref_date + self.freq * self.period
 
     # Built-in methods
@@ -97,25 +112,33 @@ class Period:
     # Convenience constructors
     @classmethod
     def monthly(cls, period: int, ref_date: date):
+        """Period with monthly date offset."""
         return cls(period, relativedelta(months=1), ref_date)
     
     @classmethod
     def quarterly(cls, period: int, ref_date: date):
+        """Period with quarterly date offset."""
         return cls(period, relativedelta(months=3), ref_date)
 
     @classmethod
     def semiannually(cls, period: int, ref_date: date):
+        """Period with 6 month date offset."""
         return cls(period, relativedelta(months=6), ref_date)
     
     @classmethod
     def yearly(cls, period: int, ref_date: date):
+        """Period with one year date offset."""
         return cls(period, relativedelta(years=1), ref_date)
     
     @classmethod
     def from_date(cls, dt: date, freq: relativedelta, ref_date: date, closed_right: bool = True):
-        """Create Period instance that contains the specified date. If `closed_right` is `True` periods include the first date and exclude the last date."""
+        """Create Period instance that contains the specified date based on the given reference start date and offset.
+        If `closed_right` is `True` periods include the first date and exclude the last date."""
         if (dt == ref_date):
-            return 0 if closed_right else 1
+            if closed_right:
+                return cls(0, freq=freq, ref_date=ref_date)
+            else:
+                return cls(1, freq=freq, ref_date=ref_date) 
         if (dt + freq) == dt:
             raise ValueError('Adding the frequency to the start date must not equal the start date')
         
@@ -133,15 +156,16 @@ class Period:
             period += increment
             in_period = period_start <= dt < period_end
             
-        return cls(period, freq, ref_date)
+        return cls(period, freq=freq, ref_date=ref_date)
     
     @classmethod
     def range(cls, freq: relativedelta, ref_date: date, start: int, end: int, step: int=1):
+        """Return iterator of Periods from period number `start` to `end`."""
         return PeriodIterator(freq, ref_date, start, end, step)
 
 
 class PeriodIterator:
-    
+    """Iterator for a range of Periods."""
     def __init__(self, freq: relativedelta, ref_date: date, start: int, end: int, step: int=1) -> None:
         self.freq = freq
         self.ref_date = ref_date

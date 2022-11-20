@@ -42,8 +42,9 @@ class Series:
         self._init_children()
     
     def _init_children(self):
-        """Add series methods to children dict"""
-        bases = type(self).__mro__
+        """Add series methods to children dict.
+        Add in reverse MRO (subclasses override super class definitions)."""
+        bases = reversed(type(self).__mro__)
         
         for base in bases:
             for attr in base.__dict__.values():

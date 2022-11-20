@@ -58,21 +58,21 @@ from respread import cached_series
 
 class Account(Series):
     
-    def __init__(self, initial_balance, interest_rate):
+    def __init__(self, initial_balance: float, interest_rate: float):
         super().__init__()
         self.initial_balance = initial_balance
         self.interest_rate = interest_rate
     
     @cached_series
-    def starting_balance(self, period):
-        return self.initial_balance if period <= 0 else self.ending_balance(period - 1)
+    def starting_balance(self, period: int):
+        return self.initial_balance if period <= 1 else self.ending_balance(period - 1)
     
     @cached_series
-    def accrual(self, period):
+    def accrual(self, period: int):
         return self.starting_balance(period) * self.interest_rate
     
     @cached_series
-    def ending_balance(self, period):
+    def ending_balance(self, period: int):
         return self.starting_balance(period) + self.accrual(period)
 
 acct = Account(initial_balance=100, interest_rate=0.01)
@@ -112,3 +112,82 @@ acct_a cache info after exit: CacheInfo(hits=0, misses=0, maxsize=None, currsize
 Durinig initialization, `Series` objects will call any `cached_series` attributes in the class definition. This means that an instance's `.children` dictionary will contain all bound and cached methods from the class definition. Accessing wrapped methods using dot notation will return the object stored in the `.children` dictionary (unless it was removed from the dictionary, in which case it will build and return a new bound and cached method).
 
 The order that methods appear in `.children` follows the order of class definition and the MRO for any subclasses. You can specify the order at initialization by redefining the `.children` dictionary.
+
+
+### Working with Dates Using `Period`s
+
+`Period` objects are date ranges that have start and end dates and can be compared to numbers.
+
+```python
+from respread import Period
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
+december = Period(period=12, ref_date=date(2020, 1, 1), freq=relativedelta(months=1))
+print(december)
+print(f'{december.start}, {december.end}')
+print(f'{december == 12, december > 11, december < 6}')
+```
+
+Output:
+```python
+Period(num=12, freq=relativedelta(months=+1), from=2020-12-01, to=2021-01-01)
+2020-12-01, 2021-01-01
+(True, True, False)
+```
+
+There are a number of convenience functions that make working with `Period`s easy.
+```python
+# convenience constructors for monthly, quarterly, semiannually, and yearly offsets
+Period.quarterly(period=1, ref_date=date(2020, 1, 1))
+
+# find the period contains a specific date
+Period.from_date(dt=date(2020, 7, 14), freq=relativedelta(months=1), ref_date=date(2020, 1, 1))
+
+# create an iterator for a sequence of periods
+Period.range(freq=relativedelta(months=1), ref_date=date(2020, 1, 1), start=0, end=12, step=2)
+```
+
+Create a `Period` factory using `functools.partial`.
+
+```python
+from functools import partial
+
+quarterly_period_factory = partial(Period, ref_date=date(2020, 1, 1), freq=relativedelta(months=3))
+print(quarterly_period_factory(3))
+print(quarterly_period_factory(100))
+```
+Output:
+```python
+Period(num=3, freq=relativedelta(months=+3), from=2020-07-01, to=2020-10-01)
+Period(num=100, freq=relativedelta(months=+3), from=2044-10-01, to=2045-01-01)
+```
+
+`Period`s are a convenient way to pass timing arguements to `Series`. Revisting the `Account` example from above, we can re-define the accrual amount to depend on length of there period. This means that our `Account` model can appropriately respond to different inputs based on a annual accrual rate. The length of a period isn't implicited hardcoded into the `Account` model.
+
+Since `Period`s can be compared to numbers, we don't have to update the `period <= 0` comparison in the `starting_balance` method. 
+
+```python
+class YearFracAccrualAccount(Account):
+    # update the calculation to reflect accrual for the period based on the 
+    # actual number of days elapsed and a 360 day year
+    @cached_series
+    def accrual(self, period: Period):
+        year_frac = (period.end - period.start).days / 360
+        return self.starting_balance(period) * year_frac * self.interest_rate
+
+yf_acc_acct = YearFracAccrualAccount(initial_balance=100, interest_rate=0.01)
+
+# create a period 10 years out (+120 months)
+p = Period(120, date(2020, 1, 1), relativedelta(months=1))
+
+with yf_acc_acct as account:
+    print(account.items(p))
+```
+Output:
+```python
+[('starting_balance', 110.67516837307105), ('accrual', 0.0953036172101445), ('ending_balance', 110.7704719902812)]
+```
+
+Note that this implementation results in variable compounding frequency depending on the frequency of the `Period`s which may not be the intended result. 
+```
