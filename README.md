@@ -65,7 +65,7 @@ class Account(Series):
     
     @cached_series
     def starting_balance(self, period: int):
-        return self.initial_balance if period <= 1 else self.ending_balance(period - 1)
+        return self.initial_balance if period <= 0 else self.ending_balance(period - 1)
     
     @cached_series
     def accrual(self, period: int):
