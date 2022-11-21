@@ -1,6 +1,7 @@
 from datetime import date
+from functools import partial
 from dateutil.relativedelta import relativedelta
-from typing import List
+from .period import Period, PeriodIterator
 
 
 def is_month_end(dt: date) -> bool:
@@ -8,7 +9,7 @@ def is_month_end(dt: date) -> bool:
 
 
 def thirty360(dt1: date, dt2: date) -> float:
-    """Returns the fraction of a year between `dt1` and `dt2` on 30 / 360 day count basis"""
+    """Returns the fraction of a year between `dt1` and `dt2` on 30 / 360 day count basis."""
 
     y1, m1, d1 = dt1.year, dt1.month, dt1.day
     y2, m2, d2 = dt2.year, dt2.month, dt2.day
@@ -26,35 +27,38 @@ def thirty360(dt1: date, dt2: date) -> float:
 
     return days / 360
 
+def actual360(dt1: date, dt2: date):
+    """Returns the fraction of a year between `dt1` and `dt2` on actual / 360 day count basis."""
+    return (dt2 - dt1).days / 360
 
-def compounded(start: date, end: date, freq: relativedelta, rate_cutoffs: List):
+
+def compounded(rate: float, from_dt: date, to_dt: date, comp_ref_dt: date, comp_freq: relativedelta, day_count: callable) -> float:
     """
-    Annualized rate on a 30/360 basis
-    Compounds at each cutoff date and at each interval defined by freq
-    rate_cutoffs should be a list of (date, rate) tuples, where date is the righthand cutoff
+    Compounded growth between dates.
+    
+    Arguments:
+        float: Growth rate
+        from_dt: First day of period
+        to_dt: Last day of period
+        comp_ref_dt: Reference date to calculate compounding dates
+        comp_freq: Compounding frequency
+        day_count: Function that takes two dates and returns the fraction of a year between them
     """
-    rate_cutoffs = sorted(rate_cutoffs, key=lambda p: p[0])
-    rate_dts, rates = zip(*rate_cutoffs)
-    dts = date_range(start, end, freq)
-    cutoff_dts = [dt for dt in rate_dts if dt > start and dt < end and dt not in dts]
-    dts = dts + cutoff_dts
-    dts.sort()
+    initial_index = Period.from_date(from_dt, ref_date=comp_ref_dt, freq=comp_freq).index
+    period_generator = PeriodIterator(ref_date=comp_ref_dt, freq=comp_freq, start=initial_index)
     
-    period_iter = iter(dts)
-    curr_period_start = next(period_iter)
+    compounded_rate = 1
+    for period in period_generator:
+        yf = day_count(max(from_dt, period.start), min(to_dt, period.end))
+        compounded_rate = compounded_rate * (1+ yf * rate)
+        if period.end >= to_dt:
+            break
     
-    fv = 1.0
-    for curr_period_end in period_iter:
-        rate = [r for d, r in rate_cutoffs if d >= curr_period_end][0]
-        fv = fv * (1 + rate * thirty360(curr_period_start, curr_period_end))
-        
-        curr_period_start = curr_period_end
-    
-    return (fv - 1) / thirty360(start, end)
+    return compounded_rate - 1
 
 
 def date_range(start: date, end: date, freq: relativedelta):
-    """Range of dates from and including the start date and to and including the end date"""
+    """Range of dates from and including the start date and to and including the end date."""
     dt_range = [start]
     curr = start
     

@@ -15,7 +15,7 @@ pip install git+https://github.com/jordanhitchcock/respread.git
 
 The default return value of a `Series` is a list of return values generated from calling the `Series'`s children with the same arguments.
 
-Children callables are accessable *i)* by accessing the the `children` attribute directly (`my_series.children[key]`), *ii)* indexing the `Series` object (`my_series[key]`), or *iii)* by dot notation (`my_series.key`).)
+Children callables are accessable *i)* by accessing the the `children` attribute directly (`my_series.children[key]`), *ii)* indexing the `Series` object (`my_series[key]`), or *iii)* by dot notation (`my_series.key`).
 
 ```python
 from respread import Series
@@ -65,7 +65,7 @@ class Account(Series):
     
     @cached_series
     def starting_balance(self, period: int):
-        return self.initial_balance if period <= 0 else self.ending_balance(period - 1)
+        return self.initial_balance if period <= 1 else self.ending_balance(period - 1)
     
     @cached_series
     def accrual(self, period: int):
@@ -123,7 +123,7 @@ from respread import Period
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-december = Period(period=12, ref_date=date(2020, 1, 1), freq=relativedelta(months=1))
+december = Period(index=12, ref_date=date(2020, 1, 1), freq=relativedelta(months=1))
 print(december)
 print(f'{december.start}, {december.end}')
 print(f'{december == 12, december > 11, december < 6}')
@@ -131,7 +131,7 @@ print(f'{december == 12, december > 11, december < 6}')
 
 Output:
 ```python
-Period(num=12, freq=relativedelta(months=+1), from=2020-12-01, to=2021-01-01)
+Period(index=12, freq=relativedelta(months=+1), from=2020-12-01, to=2021-01-01)
 2020-12-01, 2021-01-01
 (True, True, False)
 ```
@@ -139,7 +139,7 @@ Period(num=12, freq=relativedelta(months=+1), from=2020-12-01, to=2021-01-01)
 There are a number of convenience functions that make working with `Period`s easy.
 ```python
 # convenience constructors for monthly, quarterly, semiannually, and yearly offsets
-Period.quarterly(period=1, ref_date=date(2020, 1, 1))
+Period.quarterly(index=1, ref_date=date(2020, 1, 1))
 
 # find the period contains a specific date
 Period.from_date(dt=date(2020, 7, 14), freq=relativedelta(months=1), ref_date=date(2020, 1, 1))
@@ -159,8 +159,8 @@ print(quarterly_period_factory(100))
 ```
 Output:
 ```python
-Period(num=3, freq=relativedelta(months=+3), from=2020-07-01, to=2020-10-01)
-Period(num=100, freq=relativedelta(months=+3), from=2044-10-01, to=2045-01-01)
+Period(index=3, freq=relativedelta(months=+3), from=2020-07-01, to=2020-10-01)
+Period(index=100, freq=relativedelta(months=+3), from=2044-10-01, to=2045-01-01)
 ```
 
 `Period`s are a convenient way to pass timing arguements to `Series`. Revisting the `Account` example from above, we can re-define the accrual amount to depend on length of there period. This means that our `Account` model can appropriately respond to different inputs based on a annual accrual rate. The length of a period isn't implicited hardcoded into the `Account` model.
@@ -190,4 +190,3 @@ Output:
 ```
 
 Note that this implementation results in variable compounding frequency depending on the frequency of the `Period`s which may not be the intended result. 
-```

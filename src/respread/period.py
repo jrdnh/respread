@@ -1,3 +1,4 @@
+from functools import partial
 from dateutil.relativedelta import relativedelta
 from datetime import date
 
@@ -16,73 +17,72 @@ class Period:
         ref_date: The reference start date
     """
     
-    def __init__(self, period: int, ref_date: date, freq: relativedelta) -> None:
-        self._period = None
-        self.period = period
+    def __init__(self, index: int, ref_date: date, freq: relativedelta) -> None:
+        self._index = None
+        self.index = index
         self.freq = freq
         self.ref_date = ref_date
     
     @property
-    def period(self):
+    def index(self):
         """Period number"""
-        return self._period
+        return self._index
     
-    @period.setter
-    def period(self, value):
+    @index.setter
+    def index(self, value):
         try:
-            self._period = int(value)
+            self._index = int(value)
         except:
-            raise TypeError(f'Period value must be an integer, received {value} of type {type(value)}')
+            raise TypeError(f'Index value must be an integer, received {value} of type {type(value)}')
     
-    # Methods
     @property
     def start(self) -> date:
         """Period start date"""
-        return self.ref_date + self.freq * (self.period - 1)
+        return self.ref_date + self.freq * (self.index - 1)
     
     @property
     def end(self) -> date:
         """Period end date"""
-        return self.ref_date + self.freq * self.period
+        return self.ref_date + self.freq * self.index
 
     # Built-in methods
     def __eq__(self, __o) -> bool:
         if isinstance(__o, int):
-            return self.period == __o
+            return self.index == __o
         if isinstance(__o, Period):
             return hash(__o) == hash(self)  # should periods with the same start and end dates eval to True or should freq/ref_date also be the same?
         raise NotImplemented
     
     def __ne__(self, __o: object) -> bool:
         if isinstance(__o, int):
-            return self.period != __o
+            return self.index != __o
         if isinstance(__o, Period):
             return not self.__eq__(__o)
         raise NotImplemented
     
     def __lt__(self, __o: object) -> bool:
         if isinstance(__o, int):
-            return self.period < __o
+            return self.index < __o
         raise NotImplemented
     
     def __le__(self, __o: object) -> bool:
         if isinstance(__o, int):
-            return self.period <= __o
+            return self.index <= __o
         raise NotImplemented
     
     def __gt__(self, __o: object) -> bool:
         if isinstance(__o, int):
-            return self.period > __o
+            return self.index > __o
         raise NotImplemented
     
     def __ge__(self, __o: object) -> bool:
         if isinstance(__o, int):
-            return self.period >= __o
+            return self.index >= __o
         raise NotImplemented
     
     def __add__(self, other):
         if isinstance(other, int):
-            return type(self)(self.period + other, self.ref_date, self.freq)
+            return type(self)(self.index + other, self.ref_date, self.freq)
         raise NotImplemented
     
     def __radd__(self, other):
@@ -90,7 +90,7 @@ class Period:
     
     def __sub__(self, other):
         if isinstance(other, int):
-            return type(self)(self.period - other, self.ref_date, self.freq)
+            return type(self)(self.index - other, self.ref_date, self.freq)
         raise NotImplemented
     
     def __contains__(self, item: object) -> bool:
@@ -99,77 +99,73 @@ class Period:
         raise TypeError(f'Item must be a date object, received {item}')
         
     def __repr__(self) -> str:
-        res = f'Period(num={self.period}, freq={self.freq}'
+        res = f'Period(index={self.index}, freq={self.freq}'
         if self.ref_date is not None:
             res += f', from={self.start}, to={self.end}'
         res += ')'
         return res
     
     def __hash__(self) -> int:
-        return hash((self.period, self.freq, self.ref_date)) 
+        return hash((self.index, self.freq, self.ref_date)) 
     
     
     # Convenience constructors
     @classmethod
-    def monthly(cls, period: int, ref_date: date):
+    def monthly(cls, index: int, ref_date: date):
         """Period with monthly date offset."""
-        return cls(period, relativedelta(months=1), ref_date)
+        return cls(index, relativedelta(months=1), ref_date)
     
     @classmethod
-    def quarterly(cls, period: int, ref_date: date):
+    def quarterly(cls, index: int, ref_date: date):
         """Period with quarterly date offset."""
-        return cls(period, relativedelta(months=3), ref_date)
+        return cls(index, relativedelta(months=3), ref_date)
 
     @classmethod
-    def semiannually(cls, period: int, ref_date: date):
+    def semiannually(cls, index: int, ref_date: date):
         """Period with 6 month date offset."""
-        return cls(period, relativedelta(months=6), ref_date)
+        return cls(index, relativedelta(months=6), ref_date)
     
     @classmethod
-    def yearly(cls, period: int, ref_date: date):
+    def yearly(cls, index: int, ref_date: date):
         """Period with one year date offset."""
-        return cls(period, relativedelta(years=1), ref_date)
+        return cls(index, relativedelta(years=1), ref_date)
     
     @classmethod
-    def from_date(cls, dt: date, freq: relativedelta, ref_date: date, closed_right: bool = True):
+    def from_date(cls, dt: date, ref_date: date, freq: relativedelta, closed_right: bool = True):
         """Create Period instance that contains the specified date based on the given reference start date and offset.
         If `closed_right` is `True` periods include the first date and exclude the last date."""
-        if (dt == ref_date):
+        step = 1 if (dt - (ref_date + freq)) < (dt - ref_date) else -1
+        period_iterator = PeriodIterator(ref_date, freq, 0, step=step)
+        
+        for period in period_iterator:
             if closed_right:
-                return cls(0, freq=freq, ref_date=ref_date)
+                if period.start < dt <= period.end:
+                    return period
             else:
-                return cls(1, freq=freq, ref_date=ref_date) 
-        if (dt + freq) == dt:
-            raise ValueError('Adding the frequency to the start date must not equal the start date')
-        
-        period = 0
-        shift = relativedelta(days=0) if closed_right else relativedelta(days=1)
-        period_start = ref_date + shift
-        period_end = period_start + freq
-        increment = 1 if (dt > ref_date) and ((ref_date + freq) > ref_date) else -1
-        in_period = period_start <= dt < period_end
-        
-        while not in_period:
-            # Increment period range
-            period_start = period_start + freq
-            period_end = period_end + freq
-            period += increment
-            in_period = period_start <= dt < period_end
-            
-        return cls(period, freq=freq, ref_date=ref_date)
+                if period.start <= dt < period.end:
+                    return period
     
     @classmethod
-    def range(cls, freq: relativedelta, ref_date: date, start: int, end: int, step: int=1):
-        """Return iterator of Periods from period number `start` to `end`."""
+    def range(cls, ref_date: date, freq: relativedelta, start: int, end: int, step: int=1):
+        """Return iterator of Periods from index number `start` to `end`."""
         return PeriodIterator(freq, ref_date, start, end, step)
 
 
 class PeriodIterator:
-    """Iterator for a range of Periods."""
-    def __init__(self, freq: relativedelta, ref_date: date, start: int, end: int, step: int=1) -> None:
-        self.freq = freq
-        self.ref_date = ref_date
-        self.range = range(start, end, step)
+    """Iterate over Periods."""
+    def __init__(self, ref_date: date, freq: relativedelta, start: int=0, end: int=None, step: int=1) -> None:
+        self.period_factory = partial(Period, ref_date=ref_date, freq=freq)
+        self.end = end
+        self.current_index = start
+        self.step = step
     
     def __next__(self):
-        return Period(next(self.range), self.freq, self.ref_date)
+        current_period = self.period_factory(self.current_index)
+        if (self.end is None) or (current_period.end  <= self.end):
+            self.current_index += self.step
+            return current_period
+        else:
+            raise StopIteration
+    
+    def __iter__(self):
+        return self
