@@ -247,7 +247,7 @@ class Series:
         return True
 
 
-_T = TypeVar("_T", float)
+_T = TypeVar("_T")
 _P = ParamSpec("_P")
 
 
