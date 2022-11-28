@@ -2,7 +2,7 @@ from __future__ import annotations
 from copy import deepcopy
 from functools import cache
 from types import MethodType
-from typing import Any, Callable, List, TypeVar
+from typing import Any, Callable, Generic, List, ParamSpec, TypeVar
 
 
 SeriesType = TypeVar('SeriesType', bound='Series')
@@ -36,9 +36,15 @@ class Series:
     
     _internal_names: list[str] = ['children', 'id', 'parent']
     
-    def __init__(self) -> None:
-        self.children = {}
-        self.parent = None
+    def __init__(self, parent: Series = None, children: dict = None) -> None:
+        if parent is not None:
+            self.parent = parent
+        else:
+            self.parent = None
+        if children is not None:
+            self.children = children
+        else:
+            self.children = {}
         self._init_children()
     
     def _init_children(self):
@@ -241,11 +247,15 @@ class Series:
         return True
 
 
-class cached_series:
+_T = TypeVar("_T", float)
+_P = ParamSpec("_P")
+
+
+class cached_series(Generic[_P, _T]):
     
     is_series = True
     
-    def __init__(self, func, key: str = None) -> None:
+    def __init__(self, func: Callable[_P, _T], key: str = None) -> None:
         self.func = func
         self.key = key
     
@@ -253,7 +263,7 @@ class cached_series:
         if self.key is None:
             self.key = name
     
-    def __get__(self, obj, cls=None):
+    def __get__(self, obj, cls=None) -> Callable[_P, _T]:
         """
         If obj has an array attribute "children", return the item with `.id == id(self)`
         If no object in the array meets the condition, create a bound and cached version
@@ -284,3 +294,23 @@ class cached_series:
             return sum([getattr(self, name)(*args, **kwds) for name in series])
         
         return cls(func)
+    
+    @classmethod
+    def recurive_growth(cls, rate, initial_val, initial_period=0, period_name='period'):
+        series = cls(None)  # cached_series with temp func placeholder
+        
+        def func(self, *args, **kwds):
+            try:
+                period = kwds.pop('period')
+            except KeyError:
+                raise ValueError(f'Must included named period argument "{period_name}"')
+            if period < initial_period:
+                return None
+            if period == initial_period:
+                return initial_val
+            # obj key should be set before func is ever called
+            prior_val = getattr(self, series.key)(*args, **{period_name: period - 1}, **kwds)
+            return prior_val * (1 + rate)
+        
+        series.func = func
+        return series
