@@ -1,56 +1,46 @@
 from abc import ABC
-from functools import cache
-from typing import Callable, Generic, ParamSpec, TypeVar
+from functools import cache, wraps
 
 
 _SERIES_CACHE = '_series_cache'
+IS_SERIES = 'is_series'
+
+
+def is_series(obj) -> bool:
+    return getattr(obj, IS_SERIES, False)
 
 
 class SeriesType(ABC):
-    """Abstract base class for identifying types automatically treated as 'Series'."""
-    pass
+    """Abstract base class for identifying types automatically treated as series."""
+    is_series = True # TODO: reference IS_SERIES in setting this
 
 
-_P = ParamSpec('_P')
-_T = TypeVar('_T')
+def series(func):
+    setattr(func, IS_SERIES, True)
+    return func
 
 
-class series(Generic[_P, _T], SeriesType):
+def cached_series(func):
     
-    def __init__(self, func: Callable[_P, _T]) -> None:
-        super().__init__()
-        self._func = func
-        self._id = id(self)
-
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        return self._func(*args, **kwds)
-
-
-class cached_series(Generic[_P, _T], SeriesType):
-    
-    def __init__(self, func: Callable[_P, _T]) -> None:
-        super().__init__()
-        self._func = func
-        self._id = id(self)
-
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        """Assumes first arg is caller (i.e. called a method/always bound)."""
-        owner = args[0]
+    @wraps(func)
+    def wrapper(self, *args, **kwds):
+        # check if self has a cache and the cache has a matching entry
+        if ((owners_cache := getattr(self, _SERIES_CACHE, False)) and 
+            (cached_func := owners_cache.get(id(func), False))):
+            return cached_func(self, *args, **kwds)
         
-        # check if the owner has a cache and the cache has a matching entry
-        if ((owners_cache := getattr(owner, _SERIES_CACHE, False)) and 
-            (cached_func := owners_cache.get(self._id, False))):
-            return cached_func(*args, **kwds)
-        
-        # if the owner does not have a cache, try creating one
+        # if self does not have a cache, try creating one
         if not cache:
             try:
-                setattr(owner, _SERIES_CACHE, {})
+                setattr(self, _SERIES_CACHE, {})
             except:
-                raise Warning(f'Could not create a cache for {self} at object {owner}')
+                raise Warning(f'Could not create a cache for {func} at object {self}')
         
-        # created new cached func and save to owner's cache
-        cached_func = cache(self._func)
-        getattr(owner, _SERIES_CACHE)[self._id] = cached_func
+        # created new cached func and save to selfs's cache
+        cached_func = cache(func)
+        getattr(self, _SERIES_CACHE)[id(func)] = cached_func
         
-        return cached_func(*args, **kwds)
+        return cached_func(self, *args, **kwds)
+    
+    setattr(wrapper, IS_SERIES, True)
+    return wrapper
