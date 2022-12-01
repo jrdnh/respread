@@ -1,18 +1,23 @@
-from typing import Any, Tuple
+from __future__ import annotations
+from typing import Any, Callable, Dict, Tuple
 
 from respread.series import _SERIES_CACHE, SeriesType, is_series
 
 
 class SeriesGroup(SeriesType):
     
-    def __init__(self) -> None:
+    def __init__(self, parent: SeriesGroup | None = None, children: Dict[str, Callable] | None = None) -> None:
         super().__init__()
         setattr(self, _SERIES_CACHE, {})
+        self.parent = parent
         self._children = tuple()
         self._add_series_to_children()
+        if children:
+            for name, child in children:
+                self.add_child(name, child)
     
     def _add_series_to_children(self):
-        """Initialize ._children with series attrs in reverse MRO (subclasses override super class definitions)."""
+        """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
         bases = reversed(type(self).__mro__)
         
         series_attrs = {}
@@ -21,6 +26,25 @@ class SeriesGroup(SeriesType):
                 if is_series(attr):
                     series_attrs[key] = attr
         self.children = tuple(*self.children, series_attrs.keys())
+    
+    def set_parent(self, parent: SeriesGroup | None):
+        """Set parent and return self."""
+        self.parent = parent
+        return self
+    
+    def attr_above(self, attr_name: str):
+        """
+        Return first instance attribute `attr_name` above the current node.
+        
+        Return ValueError if `attr_name` is not an attribute name for any parent above the current object.
+        """
+        if self.parent is None:
+            raise ValueError(f'No attribute "{attr_name}" above object {self}')
+        try:
+            return getattr(self.parent, attr_name)
+        except AttributeError:
+            return self.parent.attr_above(attr_name)
+        
     
     @property
     def children(self):
@@ -33,8 +57,8 @@ class SeriesGroup(SeriesType):
                 raise ValueError(f'Cannot find attribute {child} for object {self}')
         self._children = tuple(new_children)
     
-    def add_child(self, name: str, child: callable, index: int = None):
-        """Add child. Will overwrite any child with the same name. index=None (default) will add to the end."""
+    def add_child(self, name: str, child: Callable, index: int = None):
+        """Add child. Will overwrite any child with the same name. `index=None` (default) will add to the end."""
         super().__setattr__(name, child)  # call on super to avoid circular reference with self.__setattr__
         new_children = list(self.children)
         if index is None:
@@ -53,5 +77,7 @@ class SeriesGroup(SeriesType):
             self.children = (child for child in self.children if child != __name)
         return super().__delattr__(__name)
     
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, *args: Any, **kwds: Any) -> Tuple:
         return tuple((child, getattr(self, child)(*args, **kwds)) for child in self.children)
+
+    
