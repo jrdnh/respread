@@ -1,4 +1,3 @@
-from abc import ABC
 from functools import cache, wraps
 
 
@@ -10,9 +9,9 @@ def is_series(obj) -> bool:
     return getattr(obj, IS_SERIES, False)
 
 
-class SeriesType(ABC):
-    """Abstract base class for identifying types automatically treated as series."""
-    is_series = True # TODO: reference IS_SERIES in setting this
+SeriesType = type('SeriesType', 
+                       tuple(), 
+                       {IS_SERIES: True, '__doc__': 'Mixin base class for identifying types automatically treated as series.'})
 
 
 def series(func):

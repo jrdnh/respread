@@ -45,7 +45,6 @@ class SeriesGroup(SeriesType):
         except AttributeError:
             return self.parent.attr_above(attr_name)
         
-    
     @property
     def children(self):
         return self._children
@@ -68,7 +67,7 @@ class SeriesGroup(SeriesType):
             self.children = new_children
     
     def __setattr__(self, __name: str, __value: Any) -> None:
-        if is_series(__value):
+        if (__name != 'parent') and is_series(__value):
             return self.add_child(__name, __value)
         return super().__setattr__(__name, __value)
     
@@ -79,5 +78,31 @@ class SeriesGroup(SeriesType):
     
     def __call__(self, *args: Any, **kwds: Any) -> Tuple:
         return tuple((child, getattr(self, child)(*args, **kwds)) for child in self.children)
-
     
+    # ---------------------------------
+    # Context manager and cache clear
+    def cache_clear(self, all_nodes=False):
+        """Clear the cache for the current node and all children (default) or entire tree."""
+        # call on parent if all_nodes
+        if all_nodes and self.parent:
+            self.parent.cache_clear(all_nodes=True)
+        # else clear own cache and call children
+        else:
+            # clear self's cache
+            getattr(self, _SERIES_CACHE).clear()
+            # try children
+            for child_name in self.children:
+                child = getattr(self, child_name)
+                try:
+                    child.cache_clear()
+                except AttributeError:
+                    pass
+    
+    def __enter__(self):
+        self.cache_clear(all_nodes=True)
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            return False
+        self.cache_clear(all_nodes=True)
