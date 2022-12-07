@@ -15,6 +15,10 @@ class SeriesGroup(SeriesType):
         if children:
             for name, child in children:
                 self.add_child(name, child)
+                try:
+                    child.parent = self
+                except AttributeError:
+                    pass
     
     def _add_series_to_children(self):
         """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
