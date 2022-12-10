@@ -13,7 +13,7 @@ class SeriesGroup(SeriesType):
         self._children = tuple()
         self._add_series_to_children()
         if children:
-            for name, child in children:
+            for name, child in children.items():
                 self.add_child(name, child)
                 try:
                     child.parent = self
