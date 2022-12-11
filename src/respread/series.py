@@ -1,7 +1,7 @@
 # from abc import ABC
 from functools import cache
 from types import MethodType
-from typing import Callable, Generic, ParamSpec, TypeVar
+from typing import Any, Callable, Generic, ParamSpec, TypeVar
 
 
 _SERIES_CACHE = '_series_cache'
@@ -23,48 +23,44 @@ SeriesType = type('SeriesType',
                        {IS_SERIES: True, '__doc__': 'Mixin base class for identifying types automatically treated as series.'})
 
 
-# -----------------------------
-# Concrete types of series
 _P = ParamSpec('_P')
 _T = TypeVar('_T')
 
 
-class series(Generic[_P, _T], SeriesType):
+class AbstractSeries(SeriesType):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__()
         self._func = func
-    
-    def __set_name__(self, owner, name: str):
-        self.__name__ = name        
-    
-    def __get__(self, obj, cls=None):
-        if obj is None:
-            return self
-        return MethodType(self, obj)
-
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        return self._func(*args, **kwds)
-
-
-class cached_series(Generic[_P, _T], SeriesType):
-    
-    def __init__(self, func: Callable[_P, _T]) -> None:
-        super().__init__()
-        self._func = func
-        self._id = id(self)
     
     def __set_name__(self, owner, name: str):
         self.__name__ = name
     
-    @property
-    def id(self):
-        return hash((self._func, self._id))
-
     def __get__(self, obj, cls=None):
         if obj is None:
             return self
         return MethodType(self, obj)
+    
+    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
+        return self._func(*args, **kwds)
+
+
+# -----------------------------
+# Concrete types of series
+class series(Generic[_P, _T], AbstractSeries):
+    
+    def __init__(self, func: Callable[_P, _T]) -> None:
+        super().__init__(func)
+
+
+class cached_series(Generic[_P, _T], AbstractSeries):
+    
+    def __init__(self, func: Callable[_P, _T]) -> None:
+        super().__init__(func)
+    
+    @property
+    def id(self):
+        return hash((id(self._func), id(self)))
 
     def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
         """Assumes first arg is caller (i.e. called as a bound method)."""
