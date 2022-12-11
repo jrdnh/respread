@@ -1,4 +1,5 @@
 from __future__ import annotations
+from itertools import chain
 from typing import Any, Callable, Dict, Tuple
 
 from respread.series import _SERIES_CACHE, SeriesType, is_series
@@ -80,8 +81,20 @@ class SeriesGroup(SeriesType):
             self.children = (child for child in self.children if child != __name)
         return super().__delattr__(__name)
     
+    # ---------------------------------
+    # Callable
     def __call__(self, *args: Any, **kwds: Any) -> Tuple:
-        return tuple((child, getattr(self, child)(*args, **kwds)) for child in self.children)
+        # return tuple(result for child in self.children for result in getattr(self, child)(*args, **kwds))
+        return tuple(child(*args, **kwds) for name, child in iter(self))
+    
+    def items(self, *args: Any, **kwds: Any) -> Tuple:
+        return tuple((name, child(*args, **kwds)) for name, child in iter(self))
+    
+    def names(self, sep='.'):
+        return tuple(f'{sep}'.join(name) for name, child in iter(self))
+    
+    def __iter__(self) -> SeriesGroupIterator:
+        return SeriesGroupIterator(self)
     
     # ---------------------------------
     # Context manager and cache clear
@@ -110,3 +123,25 @@ class SeriesGroup(SeriesType):
         if exc_type:
             return False
         self.cache_clear(all_nodes=True)
+
+
+class SeriesGroupIterator:
+    
+    def __init__(self, series: SeriesGroup) -> None:
+        self.children = []
+        
+        for child_name in series.children:
+            child = getattr(series, child_name)
+            if isinstance(child, SeriesGroup):
+                for sub_child_name, sub_child in iter(child):
+                    self.children.append(((child_name, *sub_child_name), sub_child))
+            else:
+                self.children.append(((child_name,), child))
+        
+        self.children_iterator = iter(self.children)
+    
+    def __iter__(self) -> SeriesGroupIterator:
+        return self
+    
+    def __next__(self):
+        return next(self.children_iterator)
