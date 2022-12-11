@@ -6,6 +6,18 @@ from respread.series import _SERIES_CACHE, SeriesType, is_series
 
 
 class SeriesGroup(SeriesType):
+    """
+    Callable container type for series.
+    
+    The `children` property holds the names of attributes considered children of the `SeriesGroup`.
+    Calling a `SeriesGroup` object will propogate the call to each child attribute and return
+    a tuple with the result from each child.
+    
+    Any object added to a `SeriesGroup`, whether through the class definition or during/after initialization,
+    that has a property `is_series` set to `True` will automatically have its name added to the `children` list.
+    
+    `SeriesGroup` objects are of type `SeriesType` themselves and can be nested to create callable tree structures.
+    """
     
     def __init__(self, parent: SeriesGroup | None = None, children: Dict[str, Callable] | None = None) -> None:
         super().__init__()
@@ -62,7 +74,12 @@ class SeriesGroup(SeriesType):
         self._children = tuple(new_children)
     
     def add_child(self, name: str, child: Callable, index: int = None):
-        """Add child. Will overwrite any child with the same name. `index=None` (default) will add to the end."""
+        """
+        Add child. 
+        
+        Will overwrite any child with the same name. `index=None` (default) will add to the end.
+        `child` will be added as a child regardless of whether it has property type `is_series == True`.
+        """
         super().__setattr__(name, child)  # call on super to avoid circular reference with self.__setattr__
         new_children = list(self.children)
         if index is None:
@@ -88,9 +105,11 @@ class SeriesGroup(SeriesType):
         return tuple(child(*args, **kwds) for name, child in iter(self))
     
     def items(self, *args: Any, **kwds: Any) -> Tuple:
+        """`((child_names,), result)` for each child below the node with results from calling the child."""
         return tuple((name, child(*args, **kwds)) for name, child in iter(self))
     
     def names(self, sep='.'):
+        """Full names of children, concatenated by `set` (defaults to '.')."""
         return tuple(f'{sep}'.join(name) for name, child in iter(self))
     
     def __iter__(self) -> SeriesGroupIterator:
@@ -126,7 +145,7 @@ class SeriesGroup(SeriesType):
 
 
 class SeriesGroupIterator:
-    
+    """Iterator for `SeriesGroup` returning `((child_names,), child)` for each child below the node."""
     def __init__(self, series: SeriesGroup) -> None:
         self.children = []
         
