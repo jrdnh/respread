@@ -1,8 +1,8 @@
 from functools import _lru_cache_wrapper, cache
-from types import MethodType
+from types import MethodType, SimpleNamespace
 import pytest
 
-from respread.series import AbstractSeries, cached_series, series, _SERIES_CACHE
+from respread.series import AbstractSeries, cached_series, is_series, IS_SERIES, series, _SERIES_CACHE
 
 
 def empty():
@@ -26,8 +26,29 @@ def inputs_func():
         return (args, kwds)
     return f
 
+
+# ------------------------------
+# is_series
+def test_is_series_no_attr():
+    obj = SimpleNamespace()
+    assert not is_series(obj)
+
+def test_is_series_no_attr_is_false():
+    obj = SimpleNamespace()
+    setattr(obj, IS_SERIES, False)
+    assert not is_series(obj)
+
+def test_is_series_no_attr_is_true():
+    obj = SimpleNamespace()
+    setattr(obj, IS_SERIES, True)
+    assert is_series(obj)
+
 # ------------------------------
 # Abstract Series
+def test_abstract_series_is_series():
+    abs = AbstractSeries(empty)
+    assert is_series(abs)
+
 def test_abstract_series_init():
     abs = AbstractSeries(empty)
     assert abs._func == empty

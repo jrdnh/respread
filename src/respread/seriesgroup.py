@@ -1,5 +1,4 @@
 from __future__ import annotations
-from itertools import chain
 from typing import Any, Callable, Dict, Tuple
 
 from respread.series import _SERIES_CACHE, SeriesType, is_series
@@ -48,19 +47,6 @@ class SeriesGroup(SeriesType):
         """Set parent and return self."""
         self.parent = parent
         return self
-    
-    def attr_above(self, attr_name: str):
-        """
-        Return first instance attribute `attr_name` above the current node.
-        
-        Return ValueError if `attr_name` is not an attribute name for any parent above the current object.
-        """
-        if self.parent is None:
-            raise ValueError(f'No attribute "{attr_name}" above object {self}')
-        try:
-            return getattr(self.parent, attr_name)
-        except AttributeError:
-            return self.parent.attr_above(attr_name)
         
     @property
     def children(self):
@@ -70,23 +56,29 @@ class SeriesGroup(SeriesType):
     def children(self, new_children: Tuple[str]):
         for child in new_children:
             if not hasattr(self, child):
-                raise ValueError(f'Cannot find attribute {child} for object {self}')
+                raise ValueError(f"Cannot find attribute '{child}' for object {self}")
         self._children = tuple(new_children)
     
     def add_child(self, name: str, child: Callable, index: int = None):
         """
-        Add child. 
+        Add or update child. 
         
-        Will overwrite any child with the same name. `index=None` (default) will add to the end.
-        `child` will be added as a child regardless of whether it has property type `is_series == True`.
+        If the attribute already exists, overwrites the attribute value. If `index` is specified, moves the 
+        child name to the index specified.
+        
+        If the attribute does not already exist, add the value as an attribute. Adds the name `children`
+        at the index specified or to the end if `index` is `None` (default).
+
+        `child` will be added as a child regardless of whether it has property type `is_series` of `True`.
         """
         super().__setattr__(name, child)  # call on super to avoid circular reference with self.__setattr__
-        new_children = list(self.children)
-        if index is None:
-            self.children = tuple([*self.children, name])
-        else:
+        if index is not None:
+            # remove any occurence(s) of `name` before adding name at index
+            new_children = [c for c in self.children if c != name]
             new_children.insert(index, name)
             self.children = new_children
+        elif name not in self.children:
+            self.children = tuple([*self.children, name])
     
     def __setattr__(self, __name: str, __value: Any) -> None:
         if (__name != 'parent') and is_series(__value):
@@ -97,6 +89,19 @@ class SeriesGroup(SeriesType):
         if __name in self.children:
             self.children = (child for child in self.children if child != __name)
         return super().__delattr__(__name)
+    
+    def attr_above(self, attr_name: str):
+        """
+        Return first instance attribute `attr_name` above the current node.
+        
+        Return ValueError if `attr_name` is not an attribute name for any parent above the current object.
+        """
+        if self.parent is None:
+            raise ValueError(f'No attribute "{attr_name}" above object')
+        try:
+            return getattr(self.parent, attr_name)
+        except AttributeError:
+            return self.parent.attr_above(attr_name)
     
     # ---------------------------------
     # Callable
