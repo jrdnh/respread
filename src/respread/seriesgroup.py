@@ -115,7 +115,7 @@ class SeriesGroup(SeriesType):
     
     def names(self, sep='.'):
         """Full names of children, concatenated by `set` (defaults to '.')."""
-        return tuple(f'{sep}'.join(name) for name, child in iter(self))
+        return tuple(str(sep).join(name) for name, child in iter(self))
     
     def __iter__(self) -> SeriesGroupIterator:
         return SeriesGroupIterator(self)

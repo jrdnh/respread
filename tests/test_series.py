@@ -119,3 +119,10 @@ def test_cached_series_with_existing_cache(inputs_func, owner_with_cache):
     assert len(getattr(owner_with_cache, _SERIES_CACHE)) == 1
     owner_with_cache.series()
     assert cached_func.cache_info() == (1, 1, None, 1)  # calling the series calls the already cached func
+
+def test_cached_series_owner_with_no_existing_cache_attr(inputs_func, owner_without_cache):
+    s = cached_series(inputs_func)
+    owner_without_cache.series = MethodType(s, owner_without_cache)
+    owner_without_cache.series(None)
+    assert hasattr(owner_without_cache, _SERIES_CACHE)
+    assert getattr(owner_without_cache, _SERIES_CACHE)[s.id].__wrapped__ == s._func

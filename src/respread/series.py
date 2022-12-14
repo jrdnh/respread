@@ -61,18 +61,15 @@ class cached_series(Generic[_P, _T], AbstractSeries):
     @property
     def id(self):
         return hash((id(self._func), id(self)))
-
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        """Assumes first arg is caller (i.e. called as a bound method)."""
-        owner = args[0]
-        
+    
+    def _get_cached_func(self, owner):
         # check if the owner has a cache and the cache has a matching entry
         if ((owners_cache := getattr(owner, _SERIES_CACHE, False)) and 
             (cached_func := owners_cache.get(self.id, False))):
-            return cached_func(*args, **kwds)
+            return cached_func
         
         # if the owner does not have a cache, try creating one
-        if not cache:
+        if not owners_cache:
             try:
                 setattr(owner, _SERIES_CACHE, {})
             except:
@@ -82,4 +79,10 @@ class cached_series(Generic[_P, _T], AbstractSeries):
         cached_func = cache(self._func)
         getattr(owner, _SERIES_CACHE)[self.id] = cached_func
         
+        return cached_func
+
+    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
+        """Assumes first arg is caller (i.e. called as a bound method)."""
+        owner = args[0]
+        cached_func = self._get_cached_func(owner)
         return cached_func(*args, **kwds)
