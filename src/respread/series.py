@@ -47,6 +47,8 @@ class AbstractSeries(SeriesType):
 
 # -----------------------------
 # Concrete types of series
+
+# series
 class series(Generic[_P, _T], AbstractSeries):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
@@ -62,7 +64,7 @@ class cached_series(Generic[_P, _T], AbstractSeries):
     def id(self):
         return hash((id(self._func), id(self)))
     
-    def _get_cached_func(self, owner):
+    def get_cached_func(self, owner):
         # check if the owner has a cache and the cache has a matching entry
         if ((owners_cache := getattr(owner, _SERIES_CACHE, False)) and 
             (cached_func := owners_cache.get(self.id, False))):
@@ -84,5 +86,5 @@ class cached_series(Generic[_P, _T], AbstractSeries):
     def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
         """Assumes first arg is caller (i.e. called as a bound method)."""
         owner = args[0]
-        cached_func = self._get_cached_func(owner)
+        cached_func = self.get_cached_func(owner)
         return cached_func(*args, **kwds)

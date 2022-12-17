@@ -2,6 +2,7 @@ from types import MethodType, SimpleNamespace
 import pytest
 
 from respread import cached_series, is_series, series, SeriesGroup
+from respread.seriesgroup import SeriesGroupIterator
 from respread.series import _SERIES_CACHE, IS_SERIES
 
 
@@ -227,5 +228,43 @@ def tests_iter(nested_sg):
     with pytest.raises(StopIteration):
         assert next(iterator)
 
-# update cached_series objects to propgate cache_info and cache_clear
+def test_cache_clear(nested_sg):
+    nested_sg(4), nested_sg(4)  # call twice to register one hit and one miss
+    nested_sg.cache_clear()
+    assert not getattr(nested_sg, _SERIES_CACHE)  # empty dict equals False
+    assert not getattr(nested_sg.childa, _SERIES_CACHE)
+    nested_sg(4), nested_sg(4)
+    nested_sg.childa.cache_clear(all_nodes=False)
+    assert getattr(nested_sg, _SERIES_CACHE)
+    assert not getattr(nested_sg.childa, _SERIES_CACHE)
+    nested_sg(4), nested_sg(4)
+    nested_sg.childa.cache_clear(all_nodes=True)
+    assert not getattr(nested_sg, _SERIES_CACHE)
+    assert not getattr(nested_sg.childa, _SERIES_CACHE)
 
+def test_enter(nested_sg):
+    nested_sg(4), nested_sg(4)  # call twice to register one hit and one miss
+    res = nested_sg.__enter__()
+    assert res is nested_sg
+    assert not getattr(nested_sg, _SERIES_CACHE)
+    assert not getattr(nested_sg.childa, _SERIES_CACHE)
+
+def test_exit(nested_sg):
+    nested_sg(4), nested_sg(4)  # call twice to register one hit and one miss
+    nested_sg.__exit__(None, None, None)
+    assert not getattr(nested_sg, _SERIES_CACHE)
+    assert not getattr(nested_sg.childa, _SERIES_CACHE)
+    assert nested_sg.__exit__(ValueError, None, None) == False
+
+def test_series_group_iterator(nested_sg):
+    # test SeriesGroup
+    iterator = SeriesGroupIterator(nested_sg)
+    assert iter(iterator) is iterator
+    assert next(iterator) == (('childb_func',), nested_sg.childb_func)
+    assert next(iterator) == (('childa', 'childa_func'), nested_sg.childa.childa_func)
+    with pytest.raises(StopIteration):
+        next(iterator)
+    # empty SeriesGroup
+    empty_iterator = SeriesGroupIterator(SeriesGroup())
+    with pytest.raises(StopIteration):
+        next(empty_iterator)
