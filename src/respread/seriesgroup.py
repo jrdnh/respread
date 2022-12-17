@@ -1,4 +1,5 @@
 from __future__ import annotations
+from types import MethodType
 from typing import Any, Callable, Dict, Tuple
 
 from respread.series import _SERIES_CACHE, SeriesType, is_series
@@ -147,6 +148,104 @@ class SeriesGroup(SeriesType):
         if exc_type:
             return False
         self.cache_clear(all_nodes=True)
+
+
+class DynamicSeriesGroupMeta(type):
+    """
+    Metaclass that adds class annotations to `__dir__` method.
+
+    Autocompleters may use `dir` to determine valid completion snippets.
+    """
+    
+    def __dir__(obj):
+        fields = type.__dir__(obj) + list(obj.__annotations__.keys())
+        return sorted(fields)
+
+
+class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
+    """
+    `DynamicSeriesGroup`s create series attributes as they are called.
+    
+    Creating series at runtime allows users to define callable objects
+    that depend on the shape of input data. This is helpful when the user
+    either don't know the shape of the data ahead of time or doesn't want
+    to define many repetitive classes that may change frequently as the
+    data change.
+    
+    Class annotations for each expected child series may be necessary for
+    autocompleters that use te `dir` function. Annotations may improve
+    the development experience but do not affect functionality.
+    
+    Subclasses should override the `series_factory` function to define
+    how the class should respond to attributes that don't exist in the
+    class. For example, the object might return the value from a 
+    dataframe or network request.
+    
+    
+    Examples
+    --------
+    >>> historical_revenue = {
+    ...     'product_revenue': {
+    ...         2020: 50_000_000,
+    ...         2021: 60_000_000
+    ...     },
+    ...     'service_revenue': {
+    ...         2020: 25_000_000,
+    ...         2021: 30_000_000
+    ...     }
+    ... }
+    >>> class Revenue(DynamicSeriesGroup):
+    ...     product_revenue: Callable[[int], int]
+    ...     service_revenue: Callable[[int], int]
+    ...     
+    ...     def __init__(self, historical_revenue, parent=None, children=None) -> None:
+    ...         super().__init__(parent, children)
+    ...         self.historical_revenue = historical_revenue
+    ...         
+    ...     def series_factory(self, name: str):
+    ...         if name not in self.__annotations__:
+    ...             raise AttributeError(f"No attribute '{name}")
+    ...         def make_func(series_name):  # make_func encapsulates `name`
+    ...             def series_func(self, year):
+    ...                 revenue_data = self.historical_revenue.get(series_name)
+    ...                 return revenue_data[year]
+    ...             return cached_series(series_func)
+    ...         return make_func(name)
+    ... 
+    >>> revenue = Revenue(historical_revenue)
+    >>> revenue.product_revenue(2020)
+    50000000
+    >>> revenue.service_revenue(2021)
+    30000000
+    >>> revenue.subscription_revenue(2020)
+    AttributeError: '<class 'respread.seriesgroup.DynamicSeriesGroupMeta'> object does not have attribute 'subscription_revenue'
+    """
+
+    def _method_factory(self, name):
+        return MethodType(self.series_factory(name), self)
+    
+    def __getattr__(self, name):
+        try:
+            return super(type(self)).__getattr__(self, name)
+        except AttributeError:
+            pass
+        
+        if name in list(type(self).__annotations__.keys()):
+            return self._method_factory(name)
+        
+        raise AttributeError(f"'{type(self).__class__} object does not have attribute '{name}'")
+    
+    def series_factory(self, name: str) -> Callable:
+        """
+        Function that defines result of calling non-existent attr, should be overridden.
+        
+        This function will be called as the last step in the attribute resolution process
+        with the name of the desired series as `name`. If `name` is a valid series name,
+        this function should return a series callable with a class instance as the first
+        argument. The callable will be bound before it is returned.
+        If `name` is not a valid series, it should return an `AttributeError`.
+        """
+        raise NotImplementedError
 
 
 class SeriesGroupIterator:
