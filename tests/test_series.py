@@ -91,6 +91,12 @@ def test_cached_series_id():
     s = cached_series(inputs_func)
     assert s.id == hash((id(inputs_func), id(s)))
 
+def test_get_cached_func_with_immutable_owner(inputs_func):
+    owner = tuple()
+    cs = cached_series(inputs_func)
+    with pytest.raises(ValueError):
+        cs.get_cached_func(owner)
+
 def test_cached_series_owner_with_empty_cache(inputs_func, owner_with_cache):
     s = cached_series(inputs_func)
     owner_with_cache.series = MethodType(s, owner_with_cache)

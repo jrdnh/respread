@@ -75,7 +75,7 @@ class cached_series(Generic[_P, _T], AbstractSeries):
             try:
                 setattr(owner, _SERIES_CACHE, {})
             except:
-                raise Warning(f'Could not create a cache for {self} at object {owner}')
+                raise ValueError(f'Could not create a cache for {self} at object {owner}')
         
         # created new cached func and save to owner's cache
         cached_func = cache(self._func)

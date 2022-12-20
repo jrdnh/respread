@@ -28,10 +28,8 @@ class SeriesGroup(SeriesType):
         if children:
             for name, child in children.items():
                 self.add_child(name, child)
-                try:
+                if hasattr(child, 'parent'):
                     child.parent = self
-                except AttributeError:
-                    pass
     
     def _add_series_to_children(self):
         """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
@@ -226,7 +224,7 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     
     def __getattr__(self, name):
         try:
-            return super(type(self)).__getattr__(self, name)
+            return super().__getattribute__(name)
         except AttributeError:
             pass
         

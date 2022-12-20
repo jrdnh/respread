@@ -1,8 +1,13 @@
 from types import MethodType, SimpleNamespace
+from typing import Callable
 import pytest
 
-from respread import cached_series, is_series, series, SeriesGroup
-from respread.seriesgroup import SeriesGroupIterator
+from respread import (cached_series, 
+                      DynamicSeriesGroup, 
+                      is_series, 
+                      series, 
+                      SeriesGroup)
+from respread.seriesgroup import DynamicSeriesGroupMeta, SeriesGroupIterator
 from respread.series import _SERIES_CACHE, IS_SERIES
 
 
@@ -30,7 +35,7 @@ def nested_sg() -> SeriesGroup:
     
 
 # ----------------------------
-# Tests
+# Tests: is_series
 def test_is_series(empty_sg):
     assert is_series(empty_sg)
 
@@ -39,6 +44,8 @@ def test_empty_init(empty_sg: SeriesGroup):
     assert empty_sg.children == tuple()
     assert getattr(empty_sg, _SERIES_CACHE) == {}
 
+# ----------------------------
+# Tests: SeriesGroup
 def test_init_parent():
     parent = SimpleNamespace()
     sg = SeriesGroup(parent=parent)
@@ -268,3 +275,56 @@ def test_series_group_iterator(nested_sg):
     empty_iterator = SeriesGroupIterator(SeriesGroup())
     with pytest.raises(StopIteration):
         next(empty_iterator)
+
+# ----------------------------
+# Tests: DynamicSeriesGroupMeta
+def test_dynamicseriesgroupmeta():
+    class DSGMClass(metaclass=DynamicSeriesGroupMeta):
+        my_string: str
+        my_int: int
+        my_func: Callable[[int, str], float]
+
+    assert all(item in dir(DSGMClass) for item in ('my_string', 'my_int', 'my_func'))
+    assert DSGMClass.__annotations__['my_string'] == str
+    assert DSGMClass.__annotations__['my_int'] == int
+    assert DSGMClass.__annotations__['my_func'] == Callable[[int, str], float]
+
+# ----------------------------
+# Tests: DynamicSeriesGroup
+@pytest.fixture
+def empty_dsg():
+    return DynamicSeriesGroup()
+
+@pytest.fixture
+def dsg_subclass():
+    class DSGSubclass(DynamicSeriesGroup):
+        first_series: Callable
+        second_series: Callable
+        
+        def series_factory(self, name: str) -> Callable:
+            def make_func(series_name):
+                def series_func(self, period):
+                    return (self, series_name, period)
+                return series_func
+            return make_func(name)
+    
+    return DSGSubclass()
+
+def test_series_factory(empty_dsg, dsg_subclass):
+    with pytest.raises(NotImplementedError):
+        empty_dsg.series_factory('my_series_name')
+    assert dsg_subclass.series_factory('first_series')(None, 'period_arg') == (None, 'first_series', 'period_arg')
+
+def test_method_factory(empty_dsg, dsg_subclass):
+    with pytest.raises(NotImplementedError):
+        empty_dsg._method_factory('any_string')
+    assert isinstance(dsg_subclass._method_factory('first_series'), MethodType)
+    assert dsg_subclass._method_factory('first_series')('period_arg') == (dsg_subclass, 'first_series', 'period_arg')
+
+def test_getattr(dsg_subclass):
+    assert dsg_subclass.__getattr__('items') == dsg_subclass.items
+    fs = dsg_subclass.__getattr__('first_series')
+    assert isinstance(fs, MethodType)
+    assert fs('period_arg') == (dsg_subclass, 'first_series', 'period_arg')
+    with pytest.raises(AttributeError):
+        dsg_subclass.__getattr__('missing_attr')
