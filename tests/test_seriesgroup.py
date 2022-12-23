@@ -91,8 +91,7 @@ def test_add_series_to_children():
     init_series = SeriesGroup()
     sub_sg = SubSeries(children={'init_series': init_series})
     
-    assert sub_sg.children == ('super_series', 'super_cached_series', 'override', 'sub_series', 
-                               'series_func_defined_outside_class', 'init_series')
+    assert sub_sg.children == ('init_series', 'super_series', 'super_cached_series', 'override', 'sub_series', 'series_func_defined_outside_class')
     assert sub_sg.override() == 'sub'
 
 def test_set_parent(empty_sg: SeriesGroup):
@@ -212,26 +211,26 @@ def test_attr_above():
     assert child.attr_above('funcb') == child.parent.parent.funcb
 
 def test_call(nested_sg):
-    assert nested_sg(4) == ('childb_func: 4', 'childa_func: 4')
+    assert nested_sg(4) == ('childa_func: 4', 'childb_func: 4')
     assert nested_sg.childa(4) == ('childa_func: 4',)
     nested_sg.add_child('an_int', 0)
     with pytest.raises(TypeError, match="'int' object is not callable"):
         nested_sg(4)
 
 def test_items(nested_sg):
-    assert nested_sg.items(4) == ((('childb_func',), 'childb_func: 4'), (('childa', 'childa_func'), 'childa_func: 4'))
+    assert nested_sg.items(4) == ((('childa', 'childa_func'), 'childa_func: 4'), (('childb_func',), 'childb_func: 4'))
     assert nested_sg.childa.items(4) == ((('childa_func',), 'childa_func: 4'),)
 
 def test_names(nested_sg):
-    assert nested_sg.names() == ('childb_func', 'childa.childa_func')
-    assert nested_sg.names(sep='***') == ('childb_func', 'childa***childa_func')
-    assert nested_sg.names(sep=1) == ('childb_func', 'childa1childa_func')
+    assert nested_sg.names() == ('childa.childa_func', 'childb_func')
+    assert nested_sg.names(sep='***') == ('childa***childa_func', 'childb_func')
+    assert nested_sg.names(sep=1) == ('childa1childa_func', 'childb_func')
     assert nested_sg.childa.names() == ('childa_func',)
 
 def tests_iter(nested_sg):
     iterator = nested_sg.__iter__() 
-    assert next(iterator) == (('childb_func',), nested_sg.childb_func)
     assert next(iterator) == (('childa', 'childa_func'), nested_sg.childa.childa_func)
+    assert next(iterator) == (('childb_func',), nested_sg.childb_func)
     with pytest.raises(StopIteration):
         assert next(iterator)
 
@@ -267,8 +266,8 @@ def test_series_group_iterator(nested_sg):
     # test SeriesGroup
     iterator = SeriesGroupIterator(nested_sg)
     assert iter(iterator) is iterator
-    assert next(iterator) == (('childb_func',), nested_sg.childb_func)
     assert next(iterator) == (('childa', 'childa_func'), nested_sg.childa.childa_func)
+    assert next(iterator) == (('childb_func',), nested_sg.childb_func)
     with pytest.raises(StopIteration):
         next(iterator)
     # empty SeriesGroup

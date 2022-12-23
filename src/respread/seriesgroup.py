@@ -24,12 +24,12 @@ class SeriesGroup(SeriesType):
         setattr(self, _SERIES_CACHE, {})
         self.parent = parent
         self._children = tuple()
-        self._add_series_to_children()
         if children:
             for name, child in children.items():
                 self.add_child(name, child)
                 if hasattr(child, 'parent'):
                     child.parent = self
+        self._add_series_to_children()
     
     def _add_series_to_children(self):
         """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
@@ -40,7 +40,7 @@ class SeriesGroup(SeriesType):
             for key, attr in base.__dict__.items():
                 if is_series(attr):
                     series_attrs[key] = attr
-        self.children = tuple(*self.children, series_attrs.keys())
+        self.children = tuple([*self.children, *series_attrs.keys()])
     
     def set_parent(self, parent: SeriesGroup | None):
         """Set parent and return self."""
@@ -49,6 +49,7 @@ class SeriesGroup(SeriesType):
         
     @property
     def children(self):
+        """Managed property with list of children attributes."""
         return self._children
     
     @children.setter
@@ -109,7 +110,7 @@ class SeriesGroup(SeriesType):
         return tuple(child(*args, **kwds) for name, child in iter(self))
     
     def items(self, *args: Any, **kwds: Any) -> Tuple:
-        """`((child_names,), result)` for each child below the node with results from calling the child."""
+        """Tuple of ``((child_names,), result)`` pairs with the result of calling all children in or below the node."""
         return tuple((name, child(*args, **kwds)) for name, child in iter(self))
     
     def names(self, sep='.'):
@@ -117,6 +118,7 @@ class SeriesGroup(SeriesType):
         return tuple(str(sep).join(name) for name, child in iter(self))
     
     def __iter__(self) -> SeriesGroupIterator:
+        """Iterate over ``((child_names,), child)`` for each child in or below the node."""
         return SeriesGroupIterator(self)
     
     # ---------------------------------
@@ -162,7 +164,7 @@ class DynamicSeriesGroupMeta(type):
 
 class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     """
-    `DynamicSeriesGroup`s create series attributes as they are called.
+    SeriesGroup subclass that creates children as they are accessed.
     
     Creating series at runtime allows users to define callable objects
     that depend on the shape of input data. This is helpful when the user
@@ -215,7 +217,8 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     50000000
     >>> revenue.service_revenue(2021)
     30000000
-    >>> revenue.subscription_revenue(2020)
+    >>> # fails, no "subscription_revenue" entry in "historical_revenue" object
+    >>> revenue.subscription_revenue(2020)  
     AttributeError: '<class 'respread.seriesgroup.DynamicSeriesGroupMeta'> object does not have attribute 'subscription_revenue'
     """
 
