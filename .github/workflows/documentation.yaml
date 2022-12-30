@@ -7,25 +7,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4.4.0
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install sphinx pydata-sphinx-theme sphinx-copybutton sphinx_design
-          pip install .
-      - name: Sphinx build
-        run: |
-          sphinx-build -b html docs docs/_build
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-github-pages@v3.1.12
-        if: github.ref == 'refs/heads/main'
-        with:
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/
+    - uses: actions/checkout@v3
+    - name: Build HTML
+      uses: ammaraskar/sphinx-action@master
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: html-docs
+        path: docs/build/html/
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html
