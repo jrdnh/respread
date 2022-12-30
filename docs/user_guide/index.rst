@@ -22,6 +22,7 @@ Suggestions for advanced usage and in-depth information.
 
     installation
     getting_started
+    working_with_data
     excel
 
 .. toctree::

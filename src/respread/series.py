@@ -32,6 +32,7 @@ class AbstractSeries(SeriesType):
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__()
         self._func = func
+        self.__name__ = func.__name__
     
     def __set_name__(self, owner, name: str):
         self.__name__ = name

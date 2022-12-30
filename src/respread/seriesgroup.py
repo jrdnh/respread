@@ -31,6 +31,13 @@ class SeriesGroup(SeriesType):
                     child.parent = self
         self._add_series_to_children()
     
+    # ---------------------------------
+    # Manage children and parents
+    def set_parent(self, parent: SeriesGroup | None):
+        """Set parent and return self."""
+        self.parent = parent
+        return self
+        
     def _add_series_to_children(self):
         """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
         bases = reversed(type(self).__mro__)
@@ -40,24 +47,22 @@ class SeriesGroup(SeriesType):
             for key, attr in base.__dict__.items():
                 if is_series(attr):
                     series_attrs[key] = attr
-        self.children = tuple([*self.children, *series_attrs.keys()])
+        self._children = tuple([*self._children, *series_attrs.keys()])
     
-    def set_parent(self, parent: SeriesGroup | None):
-        """Set parent and return self."""
-        self.parent = parent
-        return self
-        
-    @property
-    def children(self):
+    def _get_children(self):
         """Managed property with list of children attributes."""
         return self._children
     
-    @children.setter
-    def children(self, new_children: Tuple[str]):
+    def _set_children(self, new_children: Tuple[str]):
         for child in new_children:
             if not hasattr(self, child):
                 raise ValueError(f"Cannot find attribute '{child}' for object {self}")
         self._children = tuple(new_children)
+    
+    children = property(
+        fget=_get_children,
+        fset=_set_children
+    )
     
     def add_child(self, name: str, child: Callable, index: int = None):
         """
@@ -114,7 +119,7 @@ class SeriesGroup(SeriesType):
         return tuple((name, child(*args, **kwds)) for name, child in iter(self))
     
     def names(self, sep='.'):
-        """Full names of children, concatenated by `set` (defaults to '.')."""
+        """Full names of children, concatenated by `sep` (defaults to '.')."""
         return tuple(str(sep).join(name) for name, child in iter(self))
     
     def __iter__(self) -> SeriesGroupIterator:
@@ -194,35 +199,39 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     ...         2021: 30_000_000
     ...     }
     ... }
+    
     >>> class Revenue(DynamicSeriesGroup):
+    ... 
     ...     product_revenue: Callable[[int], int]
     ...     service_revenue: Callable[[int], int]
-    ...     
+    ... 
     ...     def __init__(self, historical_revenue, parent=None, children=None) -> None:
     ...         super().__init__(parent, children)
     ...         self.historical_revenue = historical_revenue
-    ...         
-    ...     def series_factory(self, name: str):
-    ...         if name not in self.__annotations__:
-    ...             raise AttributeError(f"No attribute '{name}")
-    ...         def make_func(series_name):  # make_func encapsulates `name`
-    ...             def series_func(self, year):
-    ...                 revenue_data = self.historical_revenue.get(series_name)
-    ...                 return revenue_data[year]
-    ...             return cached_series(series_func)
-    ...         return make_func(name)
     ... 
+    ...     def series_factory(self, name: str):
+    ...         if name not in self.historical_revenue.keys():
+    ...             raise ValueError(f'{name} not in data')
+    ...         def series_func(self, year):
+    ...             revenue_data = self.historical_revenue.get(name)
+    ...             return revenue_data[year]
+    ...         return cached_series(series_func)
+    ... 
+    ...     def get_derived_children(self):
+    ...         return list(self.historical_revenue.keys())
+    
     >>> revenue = Revenue(historical_revenue)
     >>> revenue.product_revenue(2020)
     50000000
-    >>> revenue.service_revenue(2021)
-    30000000
-    >>> # fails, no "subscription_revenue" entry in "historical_revenue" object
-    >>> revenue.subscription_revenue(2020)  
-    AttributeError: '<class 'respread.seriesgroup.DynamicSeriesGroupMeta'> object does not have attribute 'subscription_revenue'
+    
+    >>> revenue.subscription_revenue(2020)  # 'subscription_revenue' not in the data
+    <TRACEBACK INFO>
+    AttributeError: '<class '__main__.Revenue'> object does not have attribute 'subscription_revenue'
     """
 
     def _method_factory(self, name):
+        if name not in self.get_derived_children():
+            raise AttributeError(f"Attribute '{name}' does not exist for {self}")
         return MethodType(self.series_factory(name), self)
     
     def __getattr__(self, name):
@@ -231,22 +240,47 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
         except AttributeError:
             pass
         
-        if name in list(type(self).__annotations__.keys()):
-            return self._method_factory(name)
-        
-        raise AttributeError(f"'{type(self).__class__} object does not have attribute '{name}'")
+        return self._method_factory(name)
     
     def series_factory(self, name: str) -> Callable:
         """
         Function that defines result of calling non-existent attr, should be overridden.
         
-        This function will be called as the last step in the attribute resolution process
-        with the name of the desired series as `name`. If `name` is a valid series name,
-        this function should return a series callable with a class instance as the first
-        argument. The callable will be bound before it is returned.
-        If `name` is not a valid series, it should return an `AttributeError`.
+        If the object does not have an attribute ``name`` and ``name`` is in 
+        ``self.get_derived_children()``, this method will be called on attribute lookup.
+        Concrete subclasses should return a callable for the child of ``name``. The callable
+        will be bound before it is returned.
+        
+        Parameters
+        ----------
+        name : str
+            Name of requested child attribute
         """
         raise NotImplementedError
+    
+    def get_derived_children(self) -> Tuple[str]:
+        """
+        Names of derived children attributes.
+        
+        Override in concrete subclasses. Should return a tuple of strings.
+        Derived children names will appear as children. Attribute children 
+        will appear after any derived children names.
+        """
+        raise NotImplementedError
+    
+    def _get_children(self):
+        derived_children = list(self.get_derived_children())
+        attr_children = super().children
+        derived_children.extend([c for c in attr_children if c not in derived_children])
+        return tuple(derived_children)
+    
+    def _set_children(self, value):
+        return super()._set_children(value)
+    
+    children = property(
+        fget=_get_children,
+        fset=_set_children
+    )
 
 
 class SeriesGroupIterator:

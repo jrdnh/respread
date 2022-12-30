@@ -30,9 +30,9 @@ Grouping functions with ``SeriesGroup``
     >>> schedule.period_start(0)
     datetime.date(2020, 1, 1)
 
-Binding functions to the ``SeriesGroup`` object allows the function to access its other attributes, including other children.
+Binding functions to a ``SeriesGroup`` object allows the function to access the object's other attributes, including other children.
 
-.. note:: "Binding" a function to an object implicitly passes that object as the first argument. Functions defined in a class are automatically bound when they are accessed by instances of that class, and by convention referred to as ``self``.
+.. note:: "Binding" a function to an object implicitly passes that object as the first argument. Functions defined in a class are automatically bound when they are accessed by instances of that class. The first argument is referred to as ``self`` by convention.
 
         Use ``MethodType`` to manually bind a function.
 
@@ -57,7 +57,7 @@ Binding functions to the ``SeriesGroup`` object allows the function to access it
 Organizing ``SeriesGroup`` into trees
 =====================================
 
-``SeriesGroup`` objects are callable themselves. When a ``SeriesGroup`` object is called, it will propogate the call down to its children with the same function arguments. The return value will be tuple containing the responses of each child. The order of responses is determined by order in the ``.children`` property.
+``SeriesGroup`` objects are callable themselves. When a ``SeriesGroup`` object is called, it will propogate the call down to its children with the same function arguments. The return value will be a tuple containing the responses of each child. The order of responses is determined by order in the ``children`` property.
 
 .. code-block:: python
 
@@ -124,7 +124,7 @@ Objects recognized as children during regular attribute assignment will be autom
     >>> loan.children
     ('schedule', 'interest_rate', 'credit_spread')
 
-Rather than defining functions and nodes separately, you can use the ``series`` decorator to add the ``is_series`` property to functions defined in ``SeriesGroup`` subclasses. Those functions will be added as children during initialization.
+Rather than defining functions and nodes separately, you can use the ``series`` decorator to add the ``is_series`` property to functions defined in ``SeriesGroup`` subclass defitions. Those functions will be added as children during initialization.
 
 Let's redefine the schedule and loan types with a few modifications.
 
