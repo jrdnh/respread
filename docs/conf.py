@@ -22,7 +22,7 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
+version = "0.1.0"
 
 
 # -- Options for HTML output -------------------------------------------------
