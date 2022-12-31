@@ -300,14 +300,20 @@ def dsg_subclass():
         first_series: Callable
         second_series: Callable
         
+        def get_derived_children(self):
+            return tuple(self.__annotations__.keys())
+        
         def series_factory(self, name: str) -> Callable:
-            def make_func(series_name):
-                def series_func(self, period):
-                    return (self, series_name, period)
-                return series_func
-            return make_func(name)
+            def series_func(self, period):
+                return (self, name, period)
+            return series_func
     
     return DSGSubclass()
+
+def test_get_derived_children(empty_dsg: DynamicSeriesGroup, dsg_subclass: DynamicSeriesGroup):
+    with pytest.raises(NotImplementedError):
+        empty_dsg.get_derived_children()
+    assert dsg_subclass.get_derived_children() == ('first_series', 'second_series')
 
 def test_series_factory(empty_dsg, dsg_subclass):
     with pytest.raises(NotImplementedError):
@@ -316,7 +322,7 @@ def test_series_factory(empty_dsg, dsg_subclass):
 
 def test_method_factory(empty_dsg, dsg_subclass):
     with pytest.raises(NotImplementedError):
-        empty_dsg._method_factory('any_string')
+        empty_dsg._method_factory('non_child_attr')
     assert isinstance(dsg_subclass._method_factory('first_series'), MethodType)
     assert dsg_subclass._method_factory('first_series')('period_arg') == (dsg_subclass, 'first_series', 'period_arg')
 
@@ -327,3 +333,10 @@ def test_getattr(dsg_subclass):
     assert fs('period_arg') == (dsg_subclass, 'first_series', 'period_arg')
     with pytest.raises(AttributeError):
         dsg_subclass.__getattr__('missing_attr')
+
+def test_children(empty_dsg: DynamicSeriesGroup, dsg_subclass: DynamicSeriesGroup):
+    with pytest.raises(NotImplementedError):
+        empty_dsg.children
+    assert dsg_subclass.children == ('first_series', 'second_series')
+    dsg_subclass.add_child('null_child', None, index=0)
+    assert dsg_subclass.children == ('first_series', 'second_series', 'null_child')

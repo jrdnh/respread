@@ -266,7 +266,7 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
         Derived children names will appear as children. Attribute children 
         will appear after any derived children names.
         """
-        raise NotImplementedError
+        raise NotImplementedError('Must provide concrete implementation of "get_derived_children".')
     
     def _get_children(self):
         derived_children = list(self.get_derived_children())
