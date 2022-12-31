@@ -1,5 +1,8 @@
 # respread
 
+![tests](https://github.com/jrdnh/respread/actions/workflows/ci-tests.yaml/badge.svg?branch=main)
+[![codecov](https://codecov.io/gh/jrdnh/respread/branch/main/graph/badge.svg?token=NXAZZ27KED)](https://codecov.io/gh/jrdnh/respread)
+
 `respread` is a spreadsheet alternative for end-user models. It allows users to easily build a final modeling engine that can access Python's entire statistical, computational, and networking ecosystem.
 
 * **Leverage the full Python ecosystem**
