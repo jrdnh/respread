@@ -60,6 +60,11 @@ operating_income      47250000.0   76300000.0   83930000.0   92323000.0  1015553
 
 Check out the documentation for additional detail on getting started and the API reference guide.
 
+----------------
+## Documentation
+
+User and reference guides: https://jrdnh.github.io/respread/
+
 ---------------
 ## Installation
 
@@ -68,6 +73,8 @@ Requires Python 3.10 or higher. Install directly from GitHub with `pip`:
 ```sh
 pip install git+https://github.com/jordanhitchcock/respread.git
 ```
+
+The package is in alpha status and may undergo substantial changes.
 
 ------------------------------
 ## Contribute or ask questions
@@ -78,4 +85,4 @@ pip install git+https://github.com/jordanhitchcock/respread.git
 ----------
 ## License
 
-The project is [licensed](./LICENSE) under the BSD-3 Clause license.
+The project is [licensed](./LICENSE) under the BSD-3-Clause license.

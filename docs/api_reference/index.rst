@@ -8,5 +8,5 @@ Reference documentation
 .. toctree::
     :maxdepth: 2
 
-    series_group
+    seriesgroup
     series

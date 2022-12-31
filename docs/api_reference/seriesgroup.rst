@@ -1,10 +1,12 @@
-===========
-SeriesGroup
-===========
+.. _seriesgroup:
+===================
+SeriesGroup classes
+===================
+
 .. currentmodule:: respread
 
-Constructor
-~~~~~~~~~~~
+Constructors
+~~~~~~~~~~~~
 .. autosummary::
    :toctree:
 
@@ -20,6 +22,8 @@ Hierarchy and navigation
    SeriesGroup.children
    SeriesGroup.add_child
    SeriesGroup.attr_above
+   DynamicSeriesGroup.get_derived_children
+   DynamicSeriesGroup.series_factory
 
 Iteration
 ~~~~~~~~~
