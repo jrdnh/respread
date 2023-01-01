@@ -1,9 +1,10 @@
 .. _user_guide:
+
 **********
 User guide
 **********
 
-Introductions to ``respread`` to get up and running.
+Introductions to get up and running with ``respread``.
 
 .. toctree::
     :caption: Getting started

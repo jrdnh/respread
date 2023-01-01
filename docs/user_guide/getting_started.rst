@@ -1,28 +1,43 @@
 .. _getting_started:
+
 ***************
 Getting started
 ***************
 
-This quickstart guide introduces fundamental concepts by building a simple loan schedule. The loan has annual interest-only payments until the loan principal is fully repaid at maturity.
+This guide introduces fundamental concepts by building a simple loan schedule. The loan has annual interest-only payments until the loan principal is fully repaid at maturity. The final project structure will have a top-level node that holds a i) sub-node with period start/end date leaf functions and ii) leaf functions for loan economics.
 
-=======================================
-Grouping functions with ``SeriesGroup``
-=======================================
+::
 
-``respread`` organizes functions into callable composite nodes called ``SeriesGroup``. A ``SeriesGroup`` class (or subclass) holds a list of attribute names indicating which attributes are children.
+    Loan (Node)
+    ├── Schedule (Node)
+    │   ├── period_start (func)
+    │   └── period_end (func)
+    ├── beginning_balance (func)
+    ├── interest_payment (func)
+    ├── principal_payment (func)
+    └── ending_balance (func)
+
+================================
+Grouping functions with ``Node``
+================================
+
+``respread`` organizes functions into callable, composite nodes. A ``Node`` class (or subclass) holds a tuple of attribute names indicating which attributes are children. Adding a child is as simple as adding its attribute name to ``children``.
 
 .. code-block:: python
 
     >>> from datetime import date
     >>> from dateutil.relativedelta import relativedelta
-    
-    >>> from respread import SeriesGroup
+
+    >>> from respread import Node
 
     >>> def period_start(period):
     ...     return date(2020, 1, 1) + relativedelta(years=1) * period
 
-    >>> schedule = SeriesGroup()
+    >>> schedule = Node()
+    >>> # equivalent to schedule.period_start = period_start; schedule.children = ('period_start',)
     >>> schedule.add_child('period_start', period_start)
+
+.. code-block:: python
 
     >>> schedule.children
     ('period_start',)
@@ -30,22 +45,25 @@ Grouping functions with ``SeriesGroup``
     >>> schedule.period_start(0)
     datetime.date(2020, 1, 1)
 
-Binding functions to a ``SeriesGroup`` object allows the function to access the object's other attributes, including other children.
+Binding functions to a ``Node`` object allows the function to access the object's other attributes, including other children.
 
 .. note:: "Binding" a function to an object implicitly passes that object as the first argument. Functions defined in a class are automatically bound when they are accessed by instances of that class. The first argument is referred to as ``self`` by convention.
 
-        Use ``MethodType`` to manually bind a function.
+        Use ``MethodType`` to manually bind a function. Generally, as shown later in this guide, you will not need to manually bind functions.
 
 .. code-block:: python
 
     >>> from types import MethodType
 
     >>> def period_end(self, period):
-    ...     # `self` will refer to the `schedule` object after it is bound
-    ...     # end date is the start date for the next period
+    ...     # `self` will refer to the 'schedule' object after it is bound
+    ...     # The end date is the start date for the next period
     ...     return self.period_start(period + 1)
 
     >>> schedule.add_child('period_end', MethodType(period_end, schedule))
+
+.. code-block:: python
+
     >>> schedule.children
     ('period_start', 'period_end')
 
@@ -53,23 +71,25 @@ Binding functions to a ``SeriesGroup`` object allows the function to access the 
     [datetime.date(2021, 1, 1), datetime.date(2022, 1, 1), datetime.date(2023,1, 1)]
 
 
-=====================================
-Organizing ``SeriesGroup`` into trees
-=====================================
+===========================
+Organizing Nodes into trees
+===========================
 
-``SeriesGroup`` objects are callable themselves. When a ``SeriesGroup`` object is called, it will propogate the call down to its children with the same function arguments. The return value will be a tuple containing the responses of each child. The order of responses is determined by order in the ``children`` property.
+``Node`` objects are callable themselves. When a ``Node`` object is called, it will propogate the call down to its children with the same function arguments. The return value will be a tuple containing the responses of each child. The order of responses is determined by the order in the ``children`` property.
 
 .. code-block:: python
 
     >>> schedule(0)
     (datetime.date(2020, 1, 1), datetime.date(2021, 1, 1))
 
-Since ``SeriesGroup`` objects are callable themselves, they can be nested as children to create composite trees. ``SeriesGroup`` objects have a special ``parent`` attribute that is used to point to a node's parent node. The ``set_parent`` method is a convenience tool that sets the parent and returns the object for a more fluent workflow.
+Since ``Node`` objects are callable, they can be nested as children to create tree hierarchies. ``Node`` objects have a special ``parent`` attribute that is used to point to a node's parent node. The ``set_parent`` method is a convenience tool that sets the parent and returns the object for a more fluent workflow.
 
 .. code-block:: python
 
-    >>> loan = SeriesGroup()
+    >>> loan = Node()
     >>> loan.add_child('schedule', schedule.set_parent(loan))
+
+.. code-block:: python
 
     >>> loan.children
     ('schedule',)
@@ -77,22 +97,25 @@ Since ``SeriesGroup`` objects are callable themselves, they can be nested as chi
     >>> schedule.parent is loan
     True
 
-Calling the top-level node in turn calls children nodes. Ultimately, it returns a flat tuple of leaf function results.
+Calling the top-level node calls each childr node in turn. Ultimately, it returns a flat tuple of the leaf function results.
 
 .. code-block:: python
 
     >>> loan.add_child('index_rate', lambda period: 0.05)
+
+.. code-block:: python
+
     >>> loan.children
     ('schedule', 'index_rate')
 
     >>> loan(0)
     (datetime.date(2020, 1, 1), datetime.date(2021, 1, 1), 0.05)
 
-``SeriesGroup`` objects have several additional methods to inspect the function hierarchy by name, provide named responses, and iterate through children.
+``Node`` objects have several additional methods to inspect the function hierarchy by name, provide named responses, and iterate through children.
 
 .. code-block:: python
 
-    >>> loan.names()  # child names, concatenated by a period by default
+    >>> loan.names()  # child names, concatenated by a period (default)
     ('schedule.period_start', 'schedule.period_end', 'index_rate')
 
     >>> loan.items(period=0)  # ((child, names), child_result)
@@ -102,7 +125,7 @@ Calling the top-level node in turn calls children nodes. Ultimately, it returns 
     >>> next(loan_iterator)
     (('schedule', 'period_start'), <function period_start at 0x109c53370>)
     >>> next(loan_iterator)
-    (('schedule', 'period_end'), <bound method period_end of <respread.seriesgroup.SeriesGroup object at 0x109c55300>>)
+    (('schedule', 'period_end'), <bound method period_end of <respread.node.Node object at 0x109c55300>>)
     >>> next(loan_iterator)
     (('index_rate',), <function <lambda> at 0x109d30b80>)
 
@@ -110,7 +133,7 @@ Calling the top-level node in turn calls children nodes. Ultimately, it returns 
 Managing children
 =================
 
-``SeriesGroup`` objects recognize any attribute that has the property ``is_series == True`` as a child. ``SeriesGroup`` objects have ``is_series`` property enabled by default. 
+``Node`` objects recognize any attribute that has the property ``is_component == True`` as a child. ``Node`` objects have ``is_component`` property enabled by default. 
 
 Objects recognized as children during regular attribute assignment will be automatically added as children.
 
@@ -119,53 +142,53 @@ Objects recognized as children during regular attribute assignment will be autom
     >>> def credit_spread(period):
     ...     return 0.02
 
-    >>> credit_spread.is_series = True
+    >>> credit_spread.is_component = True
     >>> loan.credit_spread = credit_spread
     >>> loan.children
     ('schedule', 'interest_rate', 'credit_spread')
 
-Rather than defining functions and nodes separately, you can use the ``series`` decorator to add the ``is_series`` property to functions defined in ``SeriesGroup`` subclass defitions. Those functions will be added as children during initialization.
+Rather than defining functions and nodes separately, you can use the ``child`` decorator to add the ``is_component`` property to functions defined in ``Node`` subclass defitions. Those functions will be added as children during initialization.
 
-Let's redefine the schedule and loan types with a few modifications.
+Let's redefine the schedule and loan types with a few modifications and add payment terms.
 
 .. code-block:: python
 
-    >>> from respread import series
+    >>> from respread import child
 
-    >>> class Schedule(SeriesGroup):
+    >>> class Schedule(Node):
     ...     def __init__(self, start_date: date, period_lenth: relativedelta):
     ...         super().__init__()
     ...         self.start_date = start_date
     ...         self.period_length = period_lenth
-    ...     @series
+    ...     @child
     ...     def period_start(self, period):
     ...         return self.start_date + self.period_length * period
-    ...     @series
+    ...     @child
     ...     def period_end(self, period):
     ...         return self.period_start(period + 1)
 
-    >>> class Loan(SeriesGroup):
+    >>> class Loan(Node):
     ...     def __init__(self, coupon, amount, tenor, schedule: Schedule):
     ...         super().__init__()
     ...         self.add_child('schedule', schedule, index=0)
     ...         self.coupon = coupon
     ...         self.amount = amount
     ...         self.tenor = tenor
-    ...     @series
+    ...     @child
     ...     def beginning_balance(self, period):
     ...         return self.amount if period == 0 else self.ending_balance(period - 1)
-    ...     @series
+    ...     @child
     ...     def interest_payment(self, period):  # uses actual / 360 caclulation convention
     ...         yf = (self.schedule.period_end(period) - self.schedule.period_start(period)).days / 360
     ...         return self.coupon * yf * self.beginning_balance(period)
-    ...     @series
+    ...     @child
     ...     def principal_payment(self, period):
     ...         return self.beginning_balance(period) if period == (self.tenor - 1) else 0
-    ...     @series
+    ...     @child
     ...     def ending_balance(self, period):
     ...         return self.beginning_balance(period) - self.principal_payment(period)
 
-You can then create a loan schedule as follows. This demo assumes a 10-year loan starting 2020-01-01 at 7.0% with a principal amount of 100.
+You can then create a loan schedule as follows. This loan object assumes a 10-year term starting 2020-01-01 at 7.0% with a principal amount of 100.
 
 .. code-block:: python
 
@@ -176,6 +199,11 @@ You can then create a loan schedule as follows. This demo assumes a 10-year loan
     ...             tenor=10,
     ...             schedule=Schedule(start_date=date(2020, 1, 1),
     ...                               period_lenth=relativedelta(years=1)))
+
+.. code-block:: python
+
+    >>> loan.names()
+    ('schedule.period_start', 'schedule.period_end', 'beginning_balance', 'interest_payment', 'principal_payment', 'ending_balance')
 
     >>> yrs = range(loan.tenor)
     >>> pd.DataFrame([loan(y) for y in yrs], columns=loan.names(), index=yrs)
@@ -193,13 +221,13 @@ You can then create a loan schedule as follows. This demo assumes a 10-year loan
 
 Notice that the only magic numbers hardcoded into the class definitions are in the interest calculation convention (actual / 360). With a few minor adjstments, the ``Loan`` class could be updated to take different calculation conventions, amortization schedules, holiday adjustments, or any other term that might change. Additionally, you could create a test suite to help ensure validity of edge cases (e.g. negative period inputs).
 
-Reusability of components built with ``respread`` drive modeling efficiency since they can be easily reused and configured.
+The flexibilty of components built with ``respread`` drives modeling efficiency since components can be easily reused and configured.
 
 ============================
 Recursion limits and caching
 ============================
 
-Assume we had a 5-year loan with *daily* interest periods instead of *annual* interest periods from previous example. We could model it as follows.
+Assume we had with *daily* interest periods for a five year term instead of *annual* interest periods from previous example. We could model it using the same class definitions as follows.
 
 .. code-block:: python
 
@@ -219,7 +247,7 @@ However, there is a problem when calling the final loan period.
 .. code-block:: python
 
     >>> daily_loan(daily_loan.tenor - 1)
-    ...
+    <Traceback>
     RecursionError: maximum recursion depth exceeded
 
 The ``Schedule.period_start`` function is directly recursive. The ``beginning_balance`` and ``ending_balance`` functions in ``Loan`` are also indirectly recusive since they rely on each other back to the zeroth period. 
@@ -234,52 +262,53 @@ By default, Python limits the callstack to a depth of 1,000 frames. However, the
 
 Recursion is a natural, concise way to define many operations. ``respread`` addresses depth limits with caching and iteration.
 
-The ``cached_series`` decorator is similar to the ``series`` decorator except it wraps functions in a per-SeriesGroup-instance cache. Using the built-in ``functools.cache/lru_cache`` is not recommended since it can lead to memory or performance issues when there are many cached calls or ``SeriesGroup`` objects.
+The ``cached_child`` decorator is similar to the ``child`` decorator except it wraps functions in a per-Node-instance cache.
 
-The snippet below redefines ``Schedule`` and ``Loan`` with the caching decorator.
+The snippet below redefines ``Schedule`` and ``Loan`` with caching decorators for the recursive functions.
 
 .. code-block:: python
+    :emphasize-lines: 8, 11, 22, 32
 
-    >>> from respread import cached_series
+    >>> from respread import cached_child
 
-    >>> class Schedule(SeriesGroup):
+    >>> class Schedule(Node):
     ...     def __init__(self, start_date: date, period_lenth: relativedelta):
     ...         super().__init__()
     ...         self.start_date = start_date
     ...         self.period_length = period_lenth
-    ...     @cached_series
+    ...     @cached_child
     ...     def period_start(self, period):
     ...         return self.start_date + self.period_length * period
-    ...     @cached_series
+    ...     @cached_child
     ...     def period_end(self, period):
     ...         return self.period_start(period + 1)
 
-    >>> class Loan(SeriesGroup):
+    >>> class Loan(Node):
     ...     def __init__(self, coupon, amount, tenor, schedule: Schedule):
     ...         super().__init__()
     ...         self.add_child('schedule', schedule, index=0)
     ...         self.coupon = coupon
     ...         self.amount = amount
     ...         self.tenor = tenor
-    ...     @cached_series
+    ...     @cached_child
     ...     def beginning_balance(self, period):
     ...         return self.amount if period == 0 else self.ending_balance(period - 1)
-    ...     @cached_series
+    ...     @child
     ...     def interest_payment(self, period):  # actual / 360 convention
     ...         yf = (self.schedule.period_end(period) - self.schedule.period_start(period)).days / 360
     ...         return self.coupon * yf * self.beginning_balance(period)
-    ...     @cached_series
+    ...     @child
     ...     def principal_payment(self, period):
     ...         return self.beginning_balance(period) if period == (self.tenor - 1) else 0
-    ...     @cached_series
+    ...     @cached_child
     ...     def ending_balance(self, period):
     ...         return self.beginning_balance(period) - self.principal_payment(period)
 
-Now that results are cached, we can iterively call from the zeroth period to any arbitrarily large period in the future. 
-
 The functions in our classes are not pure functions. They depend on object state (coupon rate, amount, tenor, etc.). 
 
-``cached_series`` functions will usually depend on some object state. Whenever using a cached wrapper, calls should be placed in a context manager. Placing a ``SeriesGroup`` in a context manager clears caches across the entire tree on entry and on exit.
+``cached_child`` functions will usually depend on some object state. Whenever using a cached wrapper, calls should be placed in a context manager. Placing a ``Node`` in a context manager clears caches across the entire tree on entry and on exit. 
+
+Now that the recursive functions are cached, we can iterively call from the zeroth period to any arbitrarily large period in the future. 
 
 .. code-block:: python
 
@@ -292,6 +321,8 @@ The functions in our classes are not pure functions. They depend on object state
     ...                   schedule=Schedule(start_date=start_date,
     ...                                     period_lenth=relativedelta(days=1)))
 
+.. code-block:: python
+
     >>> with daily_loan as dl:
     ...     for p in range(periods):
     ...         payoff_period = dl(p)
@@ -301,4 +332,4 @@ The functions in our classes are not pure functions. They depend on object state
 
 This is the end of the **Getting started** guide!
 
-Start using ``respread``, dive deeper into suggested project setup or advanced topics in the documentation, or visit the project site to `ask questions <https://github.com/jrdnh/respread/issues>`_ or `contribute <https://github.com/jrdnh/respread>`_!
+Start using ``respread``, dive deeper into the documentation, or visit the project site to `ask questions <https://github.com/jrdnh/respread/issues>`_ or `contribute <https://github.com/jrdnh/respread>`_!

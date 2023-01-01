@@ -1,7 +1,8 @@
-.. _series_decorators:
-=================
-Series decorators
-=================
+.. _child_decorators:
+
+================
+Child decorators
+================
 .. currentmodule:: respread
 
 Constructor
@@ -9,15 +10,15 @@ Constructor
 .. autosummary::
    :toctree:
 
-   cached_series
+   cached_child
 
 Managing cached functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autosummary::
    :toctree:
    
-   cached_series.id
-   cached_series.get_cached_func
+   cached_child.id
+   cached_child.get_cached_func
 
 
 

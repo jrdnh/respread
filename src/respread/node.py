@@ -2,61 +2,61 @@ from __future__ import annotations
 from types import MethodType
 from typing import Any, Callable, Dict, Tuple
 
-from respread.series import _SERIES_CACHE, SeriesType, is_series
+from respread.child import _CHILD_CACHE, ComponentType, is_component
 
 
-class SeriesGroup(SeriesType):
+class Node(ComponentType):
     """
-    Callable container type for series.
+    Composite container type for children callables.
     
-    The `children` property holds the names of attributes considered children of the `SeriesGroup`.
-    Calling a `SeriesGroup` object will propogate the call to each child attribute and return
+    The `children` property holds the names of attributes considered children of the `Node`.
+    Calling a `Node` object will propogate the call to each child attribute and return
     a tuple with the result from each child.
     
-    Any object added to a `SeriesGroup`, whether through the class definition or during/after initialization,
-    that has a property `is_series` set to `True` will automatically have its name added to the `children` list.
+    Any object added to a `Node`, whether through the class definition or during/after initialization,
+    that has a property `is_component` set to `True` will automatically have its name added to the `children` list.
     
-    `SeriesGroup` objects are of type `SeriesType` themselves and can be nested to create callable tree structures.
+    `Node` objects are of type `ComponentType` themselves and can be nested to create callable tree structures.
     """
     
-    def __init__(self, parent: SeriesGroup | None = None, children: Dict[str, Callable] | None = None) -> None:
+    def __init__(self, parent: Node | None = None, children: Dict[str, Callable] | None = None) -> None:
         super().__init__()
-        setattr(self, _SERIES_CACHE, {})
+        setattr(self, _CHILD_CACHE, {})
         self.parent = parent
         self._children = tuple()
         if children:
-            for name, child in children.items():
-                self.add_child(name, child)
-                if hasattr(child, 'parent'):
-                    child.parent = self
-        self._add_series_to_children()
+            for name, child_ in children.items():
+                self.add_child(name, child_)
+                if hasattr(child_, 'parent'):
+                    child_.parent = self
+        self._add_child_to_children()
     
     # ---------------------------------
     # Manage children and parents
-    def set_parent(self, parent: SeriesGroup | None):
+    def set_parent(self, parent: Node | None):
         """Set parent and return self."""
         self.parent = parent
         return self
         
-    def _add_series_to_children(self):
-        """Initialize `._children` with series attrs in reverse MRO (subclasses override super class definitions)."""
+    def _add_child_to_children(self):
+        """Initialize `._children` with child attrs in reverse MRO (subclasses override super class definitions)."""
         bases = reversed(type(self).__mro__)
         
-        series_attrs = {}
+        child_attrs = {}
         for base in bases:
             for key, attr in base.__dict__.items():
-                if is_series(attr):
-                    series_attrs[key] = attr
-        self._children = tuple([*self._children, *series_attrs.keys()])
+                if is_component(attr):
+                    child_attrs[key] = attr
+        self._children = tuple([*self._children, *child_attrs.keys()])
     
     def _get_children(self):
-        """Managed property with list of children attributes."""
+        """Managed property with tuple of children attributes."""
         return self._children
     
     def _set_children(self, new_children: Tuple[str]):
-        for child in new_children:
-            if not hasattr(self, child):
-                raise ValueError(f"Cannot find attribute '{child}' for object {self}")
+        for child_ in new_children:
+            if not hasattr(self, child_):
+                raise ValueError(f"Cannot find attribute '{child_}' for object {self}")
         self._children = tuple(new_children)
     
     children = property(
@@ -64,19 +64,19 @@ class SeriesGroup(SeriesType):
         fset=_set_children
     )
     
-    def add_child(self, name: str, child: Callable, index: int = None):
+    def add_child(self, name: str, new_child: Callable, index: int = None):
         """
         Add or update child. 
         
         If the attribute already exists, overwrites the attribute value. If `index` is specified, moves the 
-        child name to the index specified.
+        child name to the specified index.
         
-        If the attribute does not already exist, add the value as an attribute. Adds the name `children`
-        at the index specified or to the end if `index` is `None` (default).
+        If the attribute does not already exist, add the value as an attribute and add `name` to `children`. 
+        Adds the child at the index specified or to the end if `index` is `None` (default).
 
-        `child` will be added as a child regardless of whether it has property type `is_series` of `True`.
+        `new_child` will be added as a child regardless of whether it has property type `is_component` of `True`.
         """
-        super().__setattr__(name, child)  # call on super to avoid circular reference with self.__setattr__
+        super().__setattr__(name, new_child)  # call on super to avoid circular reference with self.__setattr__
         if index is not None:
             # remove any occurence(s) of `name` before adding name at index
             new_children = [c for c in self.children if c != name]
@@ -86,13 +86,13 @@ class SeriesGroup(SeriesType):
             self.children = tuple([*self.children, name])
     
     def __setattr__(self, __name: str, __value: Any) -> None:
-        if (__name != 'parent') and is_series(__value):
+        if (__name != 'parent') and is_component(__value):
             return self.add_child(__name, __value)
         return super().__setattr__(__name, __value)
     
     def __delattr__(self, __name: str) -> None:
         if __name in self.children:
-            self.children = (child for child in self.children if child != __name)
+            self.children = (c for c in self.children if c != __name)
         return super().__delattr__(__name)
     
     def attr_above(self, attr_name: str):
@@ -111,20 +111,20 @@ class SeriesGroup(SeriesType):
     # ---------------------------------
     # Callable
     def __call__(self, *args: Any, **kwds: Any) -> Tuple:
-        # return tuple(result for child in self.children for result in getattr(self, child)(*args, **kwds))
-        return tuple(child(*args, **kwds) for name, child in iter(self))
+        # return tuple(result for c in self.children for result in getattr(self, c)(*args, **kwds))
+        return tuple(child_(*args, **kwds) for name, child_ in iter(self))
     
     def items(self, *args: Any, **kwds: Any) -> Tuple:
         """Tuple of ``((child_names,), result)`` pairs with the result of calling all children in or below the node."""
-        return tuple((name, child(*args, **kwds)) for name, child in iter(self))
+        return tuple((name, child_(*args, **kwds)) for name, child_ in iter(self))
     
     def names(self, sep='.'):
         """Full names of children, concatenated by `sep` (defaults to '.')."""
-        return tuple(str(sep).join(name) for name, child in iter(self))
+        return tuple(str(sep).join(name) for name, _ in iter(self))
     
-    def __iter__(self) -> SeriesGroupIterator:
+    def __iter__(self) -> NodeIterator:
         """Iterate over ``((child_names,), child)`` for each child in or below the node."""
-        return SeriesGroupIterator(self)
+        return NodeIterator(self)
     
     # ---------------------------------
     # Context manager and cache clear
@@ -136,12 +136,12 @@ class SeriesGroup(SeriesType):
         # else clear own cache and call children
         else:
             # clear self's cache
-            getattr(self, _SERIES_CACHE).clear()
+            getattr(self, _CHILD_CACHE).clear()
             # try children
             for child_name in self.children:
-                child = getattr(self, child_name)
+                child_ = getattr(self, child_name)
                 try:
-                    child.cache_clear()
+                    child_.cache_clear()
                 except AttributeError:
                     pass
     
@@ -155,7 +155,7 @@ class SeriesGroup(SeriesType):
         self.cache_clear(all_nodes=True)
 
 
-class DynamicSeriesGroupMeta(type):
+class DynamicNodeMeta(type):
     """
     Metaclass that adds class annotations to `__dir__` method.
 
@@ -167,21 +167,21 @@ class DynamicSeriesGroupMeta(type):
         return sorted(fields)
 
 
-class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
+class DynamicNode(Node, metaclass=DynamicNodeMeta):
     """
-    SeriesGroup subclass that creates children as they are accessed.
+    Node subclass that creates children as they are accessed.
     
-    Creating series at runtime allows users to define callable objects
+    Creating child at runtime allows users to define callable objects
     that depend on the shape of input data. This is helpful when the user
     either don't know the shape of the data ahead of time or doesn't want
     to define many repetitive classes that may change frequently as the
     data change.
     
-    Class annotations for each expected child series may be necessary for
+    Class annotations for each expected child child may be necessary for
     autocompleters that use te `dir` function. Annotations may improve
     the development experience but do not affect functionality.
     
-    Subclasses should override the `series_factory` function to define
+    Subclasses should override the `child_factory` function to define
     how the class should respond to attributes that don't exist in the
     class. For example, the object might return the value from a 
     dataframe or network request.
@@ -200,7 +200,7 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     ...     }
     ... }
     
-    >>> class Revenue(DynamicSeriesGroup):
+    >>> class Revenue(DynamicNode):
     ... 
     ...     product_revenue: Callable[[int], int]
     ...     service_revenue: Callable[[int], int]
@@ -209,13 +209,13 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     ...         super().__init__(parent, children)
     ...         self.historical_revenue = historical_revenue
     ... 
-    ...     def series_factory(self, name: str):
+    ...     def child_factory(self, name: str):
     ...         if name not in self.historical_revenue.keys():
     ...             raise ValueError(f'{name} not in data')
-    ...         def series_func(self, year):
+    ...         def child_func(self, year):
     ...             revenue_data = self.historical_revenue.get(name)
     ...             return revenue_data[year]
-    ...         return cached_series(series_func)
+    ...         return cached_child(child_func)
     ... 
     ...     def get_derived_children(self):
     ...         return list(self.historical_revenue.keys())
@@ -232,7 +232,7 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     def _method_factory(self, name):
         if name not in self.get_derived_children():
             raise AttributeError(f"Attribute '{name}' does not exist for {self}")
-        return MethodType(self.series_factory(name), self)
+        return MethodType(self.child_factory(name), self)
     
     def __getattr__(self, name):
         try:
@@ -242,7 +242,7 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
         
         return self._method_factory(name)
     
-    def series_factory(self, name: str) -> Callable:
+    def child_factory(self, name: str) -> Callable:
         """
         Function that defines result of calling non-existent attr, should be overridden.
         
@@ -283,22 +283,22 @@ class DynamicSeriesGroup(SeriesGroup, metaclass=DynamicSeriesGroupMeta):
     )
 
 
-class SeriesGroupIterator:
-    """Iterator for `SeriesGroup` returning `((child_names,), child)` for each child below the node."""
-    def __init__(self, series: SeriesGroup) -> None:
+class NodeIterator:
+    """Iterator for `Node` returning `((child_names,), child)` for each child below the node."""
+    def __init__(self, node: Node) -> None:
         self.children = []
         
-        for child_name in series.children:
-            child = getattr(series, child_name)
-            if isinstance(child, SeriesGroup):
-                for sub_child_name, sub_child in iter(child):
+        for child_name in node.children:
+            child_ = getattr(node, child_name)
+            if isinstance(child_, Node):
+                for sub_child_name, sub_child in iter(child_):
                     self.children.append(((child_name, *sub_child_name), sub_child))
             else:
-                self.children.append(((child_name,), child))
+                self.children.append(((child_name,), child_))
         
         self.children_iterator = iter(self.children)
     
-    def __iter__(self) -> SeriesGroupIterator:
+    def __iter__(self) -> NodeIterator:
         return self
     
     def __next__(self):

@@ -3,7 +3,7 @@
 ![tests](https://github.com/jrdnh/respread/actions/workflows/ci-tests.yaml/badge.svg?branch=main)
 [![codecov](https://codecov.io/gh/jrdnh/respread/branch/main/graph/badge.svg?token=NXAZZ27KED)](https://codecov.io/gh/jrdnh/respread)
 
-`respread` is a spreadsheet alternative for end-user models. It allows users to easily build a final modeling engine that can access Python's entire statistical, computational, and networking ecosystem.
+`respread` is a spreadsheet alternative for end-user models. It allows users to easily build a modeling engine that can access Python's abundant statistical, computational, and networking ecosystem.
 
 * **Leverage the full Python ecosystem**
     - Integrate statistical or AI/ML components directly into the end-user model
@@ -18,23 +18,23 @@ It is particularly well suited for generating tabular outputs where the first ax
 
 ```python
 >>> import pandas as pd
->>> from respread import cached_series, SeriesGroup
+>>> from respread import cached_child, Node
 
->>> class Revenue(SeriesGroup):
-...     @cached_series
+>>> class Revenue(Node):
+...     @cached_child
 ...     def product_rev(self, year):
 ...         return 100_000_000 if year == 2020 else self.product_rev(year - 1) * 1.1
-...     @cached_series
+...     @cached_child
 ...     def service_rev(self, year):
 ...         return 35_000_000 if year == 2020 else self.product_rev(year - 1) * 1.08
 
->>> class OperatingStatement(SeriesGroup):
+>>> class OperatingStatement(Node):
 ...     def __init__(self, revenue):
 ...         super().__init__(children={'revenue': revenue})
-...     @cached_series
+...     @cached_child
 ...     def operating_expenses(self, year):
 ...         return -sum(self.revenue(year)) * 0.65
-...     @cached_series
+...     @cached_child
 ...     def operating_income(self, year):
 ...         return sum(self.revenue(year)) + self.operating_expenses(year)
 
@@ -52,9 +52,9 @@ operating_income      47250000.0   76300000.0   83930000.0   92323000.0  1015553
 -----------
 ## Features
 
-* Detail drill-down by regular attribute dot notation
+* Access subgroups by regular attribute dot notation
 * Automatic recognition of new children elements as they are added
-* Cache management for expensive or long-running calculations
+* Cache management for recursive or expensive calculations
 * Ability to dynamically create child functions at runtime
 * IDE-aware design with support for type annotations and autocompletion
 
@@ -74,7 +74,7 @@ Requires Python 3.10 or higher. Install directly from GitHub with `pip`:
 pip install git+https://github.com/jordanhitchcock/respread.git
 ```
 
-The package is in alpha status and may undergo substantial changes.
+The package is in alpha status and may undergo material changes.
 
 ------------------------------
 ## Contribute or ask questions

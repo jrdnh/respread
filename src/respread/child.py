@@ -1,33 +1,29 @@
 # from abc import ABC
 from functools import cache
 from types import MethodType
-from typing import Any, Callable, Generic, ParamSpec, TypeVar
+from typing import Callable, Generic, ParamSpec, TypeVar
 
 
-_SERIES_CACHE = '_series_cache'
-IS_SERIES = 'is_series'
+_CHILD_CACHE = '_child_cache'
+IS_COMPONENT = 'is_component'
 
 
 # -----------------------------
 # Helpers
-def is_series(obj) -> bool:
-    return getattr(obj, IS_SERIES, False)
+def is_component(obj) -> bool:
+    return getattr(obj, IS_COMPONENT, False)
 
 
-# class SeriesType(ABC):
-#     """Abstract base class for identifying types automatically treated as series."""
-#     is_series = True # TODO: reference IS_SERIES in setting this
-
-SeriesType = type('SeriesType', 
-                       tuple(), 
-                       {IS_SERIES: True, '__doc__': 'Mixin base class for identifying types automatically treated as series.'})
+ComponentType = type('ComponentType', 
+                     tuple(), 
+                     {IS_COMPONENT: True, '__doc__': 'Mixin base class for identifying types automatically treated as components.'})
 
 
 _P = ParamSpec('_P')
 _T = TypeVar('_T')
 
 
-class AbstractSeries(SeriesType):
+class AbstractChild(ComponentType):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__()
@@ -46,17 +42,16 @@ class AbstractSeries(SeriesType):
         return self._func(*args, **kwds)
 
 
-# -----------------------------
-# Concrete types of series
+# -----------------------
+# Concrete types of AbstractChild
 
-# series
-class series(Generic[_P, _T], AbstractSeries):
+class child(Generic[_P, _T], AbstractChild):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__(func)
 
 
-class cached_series(Generic[_P, _T], AbstractSeries):
+class cached_child(Generic[_P, _T], AbstractChild):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__(func)
@@ -67,20 +62,20 @@ class cached_series(Generic[_P, _T], AbstractSeries):
     
     def get_cached_func(self, owner):
         # check if the owner has a cache and the cache has a matching entry
-        if ((owners_cache := getattr(owner, _SERIES_CACHE, False)) and 
+        if ((owners_cache := getattr(owner, _CHILD_CACHE, False)) and 
             (cached_func := owners_cache.get(self.id, False))):
             return cached_func
         
         # if the owner does not have a cache, try creating one
         if not owners_cache:
             try:
-                setattr(owner, _SERIES_CACHE, {})
+                setattr(owner, _CHILD_CACHE, {})
             except:
                 raise ValueError(f'Could not create a cache for {self} at object {owner}')
         
         # created new cached func and save to owner's cache
         cached_func = cache(self._func)
-        getattr(owner, _SERIES_CACHE)[self.id] = cached_func
+        getattr(owner, _CHILD_CACHE)[self.id] = cached_func
         
         return cached_func
 

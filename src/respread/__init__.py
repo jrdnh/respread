@@ -1,2 +1,2 @@
-from respread.series import series, cached_series, is_series
-from respread.seriesgroup import DynamicSeriesGroup, SeriesGroup
+from respread.child import child, cached_child, ComponentType, is_component
+from respread.node import DynamicNode, Node
