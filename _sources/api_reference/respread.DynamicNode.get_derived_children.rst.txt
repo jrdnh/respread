@@ -1,0 +1,6 @@
+﻿respread.DynamicNode.get\_derived\_children
+===========================================
+
+.. currentmodule:: respread
+
+.. automethod:: DynamicNode.get_derived_children

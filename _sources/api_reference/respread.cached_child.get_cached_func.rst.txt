@@ -1,0 +1,6 @@
+﻿respread.cached\_child.get\_cached\_func
+========================================
+
+.. currentmodule:: respread
+
+.. automethod:: cached_child.get_cached_func

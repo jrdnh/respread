@@ -1,0 +1,6 @@
+﻿respread.cached\_child.id
+=========================
+
+.. currentmodule:: respread
+
+.. autoproperty:: cached_child.id

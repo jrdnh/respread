@@ -1,0 +1,6 @@
+﻿respread.DynamicNode.child\_factory
+===================================
+
+.. currentmodule:: respread
+
+.. automethod:: DynamicNode.child_factory

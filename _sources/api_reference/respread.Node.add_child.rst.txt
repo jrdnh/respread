@@ -1,0 +1,6 @@
+﻿respread.Node.add\_child
+========================
+
+.. currentmodule:: respread
+
+.. automethod:: Node.add_child

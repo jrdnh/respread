@@ -1,0 +1,15 @@
+.. _user_guide:
+
+**********
+User guide
+**********
+
+Introductions to get up and running with ``respread``.
+
+.. toctree::
+    :caption: Getting started
+    :maxdepth: 2
+
+    installation
+    getting_started
+    working_with_data

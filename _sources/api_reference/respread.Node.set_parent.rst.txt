@@ -1,0 +1,6 @@
+﻿respread.Node.set\_parent
+=========================
+
+.. currentmodule:: respread
+
+.. automethod:: Node.set_parent

@@ -1,0 +1,6 @@
+﻿respread.Node.cache\_clear
+==========================
+
+.. currentmodule:: respread
+
+.. automethod:: Node.cache_clear

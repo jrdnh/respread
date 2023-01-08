@@ -1,0 +1,30 @@
+﻿respread.cached\_child
+======================
+
+.. currentmodule:: respread
+
+.. autoclass:: cached_child
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~cached_child.__init__
+      ~cached_child.get_cached_func
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~cached_child.id
+      ~cached_child.is_component
+   
+   
