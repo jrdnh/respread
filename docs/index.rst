@@ -3,7 +3,8 @@ respread documentation
 **********************
 
 **Version**: |version|
-**Status**: Alpha, subject to future breaking changes
+
+**Status**: Currently in active development, improvements may introduce breaking changes
 
 :mod:`respread` is a spreadsheet alternative for end-user models. It allows users to easily build a final modeling engine that can access Python's entire statistical, computational, and networking ecosystem.
 
