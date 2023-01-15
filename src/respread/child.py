@@ -23,28 +23,6 @@ _P = ParamSpec('_P')
 _T = TypeVar('_T')
 
 
-# class AbstractChild(ComponentType):
-    
-#     def __init__(self, func: Callable[_P, _T]) -> None:
-#         super().__init__()
-#         self._func = func
-#         self.__name__ = func.__name__
-    
-#     def __set_name__(self, owner, name: str):
-#         self.__name__ = name
-    
-#     def __get__(self, obj, cls=None):
-#         if obj is None:
-#             return self
-#         return MethodType(self, obj)
-    
-#     def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-#         return self._func(*args, **kwds)
-
-
-# -----------------------
-# Concrete types of AbstractChild
-
 class child(Generic[_P, _T], ComponentType):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
@@ -78,9 +56,6 @@ class cached_child(Generic[_P, _T], ComponentType):
         if obj is None:
             return self
         return MethodType(self, obj)
-    
-    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        return self._func(*args, **kwds)
     
     @property
     def id(self):

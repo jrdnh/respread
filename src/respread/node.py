@@ -115,14 +115,8 @@ class Node(ComponentType):
         return tuple((name, child_(*args, **kwds)) for name, child_ in iter(self))
     
     def values(self, *args: Any, **kwds: Any) -> Tuple:
-        """Tuple of values of leaf functions. Args and keywords propogated to all leafs."""
-        values = tuple()
-        for child_ in (child_ for name, child_ in iter(self)):
-            if isinstance(child_, Node):
-                values = (*values, *child_.values(*args, **kwds))
-            else:
-                values = (*values, child_(*args, **kwds))
-        return values
+        """Tuple of values of leaf function results. Args and keywords propogated to all leafs."""
+        return tuple(child_(*args, **kwds) for name, child_ in iter(self))
     
     def names(self, sep='.'):
         """Full names of children, concatenated by `sep` (defaults to '.')."""

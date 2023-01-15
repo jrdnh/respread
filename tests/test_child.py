@@ -62,7 +62,7 @@ def test_child_init(child_types):
 
 def test_abstract_child_set_name(child_types):
     for child_type in child_types:
-        class EmptyClass():
+        class EmptyClass:
             @child_type
             def wrapped_func():
                 pass
@@ -70,7 +70,7 @@ def test_abstract_child_set_name(child_types):
 
 def test_child_get(child_types):
     for child_type in child_types:
-        class EmptyClass():
+        class EmptyClass:
             @child_type
             def wrapped_func():
                 pass
@@ -80,11 +80,12 @@ def test_child_get(child_types):
 
 def test_child_call(child_types):
     for child_type in child_types:
-        class EmptyClass():
+        class EmptyClass:
             @child_type
             def wrapped_func(*args, **kwds):
                 return (args, kwds)
         ec = EmptyClass()
+        assert EmptyClass.wrapped_func(ec, 1, two=2) == ((ec, 1), {'two': 2})
         assert ec.wrapped_func(1, two=2) == ((ec, 1), {'two': 2})
 
 # ------------------------------
