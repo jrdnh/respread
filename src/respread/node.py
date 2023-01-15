@@ -110,13 +110,19 @@ class Node(ComponentType):
     
     # ---------------------------------
     # Callable
-    def __call__(self, *args: Any, **kwds: Any) -> Tuple:
-        # return tuple(result for c in self.children for result in getattr(self, c)(*args, **kwds))
-        return tuple(child_(*args, **kwds) for name, child_ in iter(self))
-    
     def items(self, *args: Any, **kwds: Any) -> Tuple:
         """Tuple of ``((child_names,), result)`` pairs with the result of calling all children in or below the node."""
         return tuple((name, child_(*args, **kwds)) for name, child_ in iter(self))
+    
+    def values(self, *args: Any, **kwds: Any) -> Tuple:
+        """Tuple of values of leaf functions. Args and keywords propogated to all leafs."""
+        values = tuple()
+        for child_ in (child_ for name, child_ in iter(self)):
+            if isinstance(child_, Node):
+                values = (*values, *child_.values(*args, **kwds))
+            else:
+                values = (*values, child_(*args, **kwds))
+        return values
     
     def names(self, sep='.'):
         """Full names of children, concatenated by `sep` (defaults to '.')."""
@@ -125,6 +131,9 @@ class Node(ComponentType):
     def __iter__(self) -> NodeIterator:
         """Iterate over ``((child_names,), child)`` for each child in or below the node."""
         return NodeIterator(self)
+    
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self.values(*args, **kwds)
     
     # ---------------------------------
     # Context manager and cache clear

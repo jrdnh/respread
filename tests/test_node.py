@@ -211,13 +211,6 @@ def test_attr_above():
     assert child_obj.attr_above('funca') == child_obj.parent.funca
     assert child_obj.attr_above('funcb') == child_obj.parent.parent.funcb
 
-def test_call(nested_node):
-    assert nested_node(4) == ('childa_func: 4', 'childb_func: 4')
-    assert nested_node.childa(4) == ('childa_func: 4',)
-    nested_node.add_child('an_int', 0)
-    with pytest.raises(TypeError, match="'int' object is not callable"):
-        nested_node(4)
-
 def test_items(nested_node):
     assert nested_node.items(4) == ((('childa', 'childa_func'), 'childa_func: 4'), (('childb_func',), 'childb_func: 4'))
     assert nested_node.childa.items(4) == ((('childa_func',), 'childa_func: 4'),)
@@ -227,6 +220,13 @@ def test_names(nested_node):
     assert nested_node.names(sep='***') == ('childa***childa_func', 'childb_func')
     assert nested_node.names(sep=1) == ('childa1childa_func', 'childb_func')
     assert nested_node.childa.names() == ('childa_func',)
+
+def test_values(nested_node):
+    assert nested_node.values(4) == ('childa_func: 4', 'childb_func: 4')
+    assert nested_node.childa.values(4) == ('childa_func: 4',)
+    nested_node.add_child('an_int', 0)
+    with pytest.raises(TypeError, match="'int' object is not callable"):
+        nested_node.values(4)
 
 def tests_iter(nested_node):
     iterator = nested_node.__iter__() 

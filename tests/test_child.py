@@ -2,11 +2,16 @@ from functools import _lru_cache_wrapper, cache
 from types import MethodType, SimpleNamespace
 import pytest
 
-from respread.child import AbstractChild, cached_child, child, is_component, IS_COMPONENT, _CHILD_CACHE
+from respread.child import cached_child, child, is_component, IS_COMPONENT, _CHILD_CACHE
 
 
 def empty():
     return
+
+@pytest.fixture
+def child_types():
+    """Return set of all child types."""
+    return {child, cached_child}
 
 
 @pytest.fixture
@@ -44,38 +49,43 @@ def test_is_component_no_attr_is_true():
     assert is_component(obj)
 
 # ------------------------------
-# Abstract Child
-def test_abstract_child_is_component():
-    abs = AbstractChild(empty)
-    assert is_component(abs)
+# Common elements
+def test_child_is_component(child_types):
+    child_objs = (child_(empty) for child_ in child_types)
+    for child_obj in child_objs:
+        assert is_component(child_obj)
 
-def test_abstract_child_init():
-    abs = AbstractChild(empty)
-    assert abs._func == empty
+def test_child_init(child_types):
+    child_objs = (child_(empty) for child_ in child_types)
+    for child_obj in child_objs:
+        assert child_obj._func == empty
 
-def test_abstract_child_set_name():
-    class EmptyClass():
-        @AbstractChild
-        def wrapped_func():
-            pass
-    assert EmptyClass.wrapped_func.__name__ == 'wrapped_func'
+def test_abstract_child_set_name(child_types):
+    for child_type in child_types:
+        class EmptyClass():
+            @child_type
+            def wrapped_func():
+                pass
+        assert EmptyClass.wrapped_func.__name__ == 'wrapped_func'
 
-def test_abstract_child_get():
-    class EmptyClass():
-        @AbstractChild
-        def wrapped_func():
-            pass
-    assert type(EmptyClass.wrapped_func) == AbstractChild
-    ec = EmptyClass()
-    assert type(ec.wrapped_func) == MethodType
+def test_child_get(child_types):
+    for child_type in child_types:
+        class EmptyClass():
+            @child_type
+            def wrapped_func():
+                pass
+        assert type(EmptyClass.wrapped_func) == child_type
+        ec = EmptyClass()
+        assert type(ec.wrapped_func) == MethodType
 
-def test_abstract_child_call():
-    class EmptyClass():
-        @AbstractChild
-        def wrapped_func(*args, **kwds):
-            return (args, kwds)
-    ec = EmptyClass()
-    assert ec.wrapped_func(1, two=2) == ((ec, 1), {'two': 2})
+def test_child_call(child_types):
+    for child_type in child_types:
+        class EmptyClass():
+            @child_type
+            def wrapped_func(*args, **kwds):
+                return (args, kwds)
+        ec = EmptyClass()
+        assert ec.wrapped_func(1, two=2) == ((ec, 1), {'two': 2})
 
 # ------------------------------
 # child

@@ -23,7 +23,29 @@ _P = ParamSpec('_P')
 _T = TypeVar('_T')
 
 
-class AbstractChild(ComponentType):
+# class AbstractChild(ComponentType):
+    
+#     def __init__(self, func: Callable[_P, _T]) -> None:
+#         super().__init__()
+#         self._func = func
+#         self.__name__ = func.__name__
+    
+#     def __set_name__(self, owner, name: str):
+#         self.__name__ = name
+    
+#     def __get__(self, obj, cls=None):
+#         if obj is None:
+#             return self
+#         return MethodType(self, obj)
+    
+#     def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
+#         return self._func(*args, **kwds)
+
+
+# -----------------------
+# Concrete types of AbstractChild
+
+class child(Generic[_P, _T], ComponentType):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
         super().__init__()
@@ -42,19 +64,23 @@ class AbstractChild(ComponentType):
         return self._func(*args, **kwds)
 
 
-# -----------------------
-# Concrete types of AbstractChild
-
-class child(Generic[_P, _T], AbstractChild):
+class cached_child(Generic[_P, _T], ComponentType):
     
     def __init__(self, func: Callable[_P, _T]) -> None:
-        super().__init__(func)
-
-
-class cached_child(Generic[_P, _T], AbstractChild):
+        super().__init__()
+        self._func = func
+        self.__name__ = func.__name__
     
-    def __init__(self, func: Callable[_P, _T]) -> None:
-        super().__init__(func)
+    def __set_name__(self, owner, name: str):
+        self.__name__ = name
+    
+    def __get__(self, obj, cls=None):
+        if obj is None:
+            return self
+        return MethodType(self, obj)
+    
+    def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
+        return self._func(*args, **kwds)
     
     @property
     def id(self):
@@ -80,7 +106,6 @@ class cached_child(Generic[_P, _T], AbstractChild):
         return cached_func
 
     def __call__(self, *args: _P.args, **kwds: _P.kwargs) -> _T:
-        """Assumes first arg is caller (i.e. called as a bound method)."""
-        owner = args[0]
+        owner = args[0]  # Assumes first arg is caller (i.e. called as a bound method)
         cached_func = self.get_cached_func(owner)
         return cached_func(*args, **kwds)
