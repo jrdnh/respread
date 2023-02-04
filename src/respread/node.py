@@ -95,6 +95,13 @@ class Node(ComponentType):
             self.children = (c for c in self.children if c != __name)
         return super().__delattr__(__name)
     
+    @property
+    def root(self):
+        """Calculated property for the root node of the structure."""
+        if self.parent is not None:
+            return self.parent.root
+        return self
+    
     def attr_above(self, attr_name: str):
         """
         Return first instance attribute `attr_name` above the current node.

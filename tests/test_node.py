@@ -176,6 +176,29 @@ def test_delattr(empty_node: Node):
     del empty_node.non_child
     assert not hasattr(empty_node, 'new_child')
 
+def test_root():
+    
+    class Parent(Node):
+        @child
+        def funca(self):
+            return 'parent funca'
+        @child
+        def funcc(self):
+            return 'parent funcc'
+    
+    class Child(Node):
+        @child
+        def funca(self):
+            return 'child funca'
+        @child
+        def funcd(self):
+            return 'child funcd'
+    
+    parent = Parent()
+    child_obj = Child(parent=parent)
+    assert child_obj.root is parent
+    assert parent.root is parent
+
 def test_attr_above():
     
     class SuperParent(Node):
