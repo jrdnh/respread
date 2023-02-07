@@ -121,6 +121,9 @@ Calling the top-level node calls each childr node in turn. Ultimately, it return
     >>> loan.items(period=0)  # ((child, names), child_result)
     ((('schedule', 'period_start'), datetime.date(2020, 1, 1)), (('schedule', 'period_end'), datetime.date(2021, 1, 1)), (('index_rate',), 0.05))
 
+    >>> loan.display(period=0)  # (names, child_results) tuples where errors are ignored
+    (('schedule.period_start', datetime.date(2020, 1, 1)), ('schedule.period_end', datetime.date(2021, 1, 1)), ('index_rate', 0.05))
+
     >>> loan_iterator = iter(loan)  # iterate over ((child, names), child_function)
     >>> next(loan_iterator)
     (('schedule', 'period_start'), <function period_start at 0x109c53370>)
