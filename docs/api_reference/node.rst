@@ -32,6 +32,7 @@ Iteration
 .. autosummary::
    :toctree:
 
+   Node.display
    Node.items
    Node.values
    Node.names

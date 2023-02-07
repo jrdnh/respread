@@ -234,6 +234,14 @@ def test_attr_above():
     assert child_obj.attr_above('funca') == child_obj.parent.funca
     assert child_obj.attr_above('funcb') == child_obj.parent.parent.funcb
 
+def test_display(nested_node):
+    assert nested_node.display(4) == (('childa.childa_func', 'childa_func: 4'), ('childb_func', 'childb_func: 4'))
+    assert nested_node.childa.display(4) == (('childa_func', 'childa_func: 4'),)
+    def error_func(self, num):
+        raise ValueError
+    nested_node.childa = MethodType(error_func, nested_node)
+    assert nested_node.display(4) == (('childa', None), ('childb_func', 'childb_func: 4'))
+
 def test_items(nested_node):
     assert nested_node.items(4) == ((('childa', 'childa_func'), 'childa_func: 4'), (('childb_func',), 'childb_func: 4'))
     assert nested_node.childa.items(4) == ((('childa_func',), 'childa_func: 4'),)

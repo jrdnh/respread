@@ -4,8 +4,11 @@ from typing import Any, Callable, Dict, Tuple
 
 from respread.child import _CHILD_CACHE, ComponentType, is_component
 
+from typing import Generic, TypeVar
+_ParentType = TypeVar('_ParentType', bound='Node', covariant=True)
 
-class Node(ComponentType):
+
+class Node(ComponentType, Generic[_ParentType]):
     """
     Composite container type for children callables.
     
@@ -19,7 +22,7 @@ class Node(ComponentType):
     `Node` objects are of type `ComponentType` themselves and can be nested to create callable tree structures.
     """
     
-    def __init__(self, parent: Node | None = None, children: Dict[str, Callable] | None = None) -> None:
+    def __init__(self, parent: _ParentType | None = None, children: Dict[str, Callable] | None = None) -> None:
         super().__init__()
         setattr(self, _CHILD_CACHE, {})
         self.parent = parent
@@ -117,6 +120,23 @@ class Node(ComponentType):
     
     # ---------------------------------
     # Callable
+    def display(self, *args: Any, **kwds: Any) -> Tuple[str, Any]:
+        """
+        Tuple of ``(name, value)`` for leaf functionswhere the name is the child path concatenated by periods and the 
+        value is the leaf value with arguments propogated. 
+        
+        Any exceptions raised will be ignored and replaced with ``None``.
+
+        Useful for displaying results where some parameter values are not valid for all children.
+        """
+        results = []
+        for name, child_ in iter(self):
+            try:
+                results.append(('.'.join(name), child_(*args, **kwds)))
+            except:
+                results.append(('.'.join(name), None))
+        return tuple(results)
+    
     def items(self, *args: Any, **kwds: Any) -> Tuple:
         """Tuple of ``((child_names,), result)`` pairs with the result of calling all children in or below the node."""
         return tuple((name, child_(*args, **kwds)) for name, child_ in iter(self))
