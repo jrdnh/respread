@@ -11,3 +11,4 @@ Reference documentation
 
     node
     child
+    functions
