@@ -342,6 +342,11 @@ def dynamicnode_subclass():
     
     return DNMSubclass()
 
+def test_dir(dynamicnode_subclass: DynamicNode):
+    obj_dir = object.__dir__(dynamicnode_subclass)
+    expected_dir = sorted((*obj_dir, *dynamicnode_subclass.__annotations__.keys()))
+    assert dir(dynamicnode_subclass) == expected_dir
+
 def test_get_derived_children(empty_dynamicnode: DynamicNode, dynamicnode_subclass: DynamicNode):
     with pytest.raises(NotImplementedError):
         empty_dynamicnode.get_derived_children()

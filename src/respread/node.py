@@ -197,7 +197,7 @@ class DynamicNodeMeta(type):
         return sorted(fields)
 
 
-class DynamicNode(Node, metaclass=DynamicNodeMeta):
+class DynamicNode(Node[_ParentType], metaclass=DynamicNodeMeta):
     """
     Node subclass that creates children as they are accessed.
     
@@ -258,6 +258,10 @@ class DynamicNode(Node, metaclass=DynamicNodeMeta):
     <TRACEBACK INFO>
     AttributeError: '<class '__main__.Revenue'> object does not have attribute 'subscription_revenue'
     """
+    
+    # def __dir__(self):
+    #     fields = super().__dir__() + list(self.__annotations__.keys())
+    #     return sorted(fields)
 
     def _method_factory(self, name):
         if name not in self.get_derived_children():
