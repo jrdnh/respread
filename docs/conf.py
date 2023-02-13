@@ -44,6 +44,6 @@ html_theme_options = {
     ]
 }
 
-copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_text = r">>> |\.\.\. "
 copybutton_prompt_is_regexp = True
 copybutton_only_copy_prompt_lines = True

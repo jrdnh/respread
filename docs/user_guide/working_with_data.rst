@@ -1,7 +1,7 @@
 .. _working_with_data:
 
 *****************
-Working with Data
+Working with data
 *****************
 
 Arrays of data, such as historical financials or future projections, are common model inputs. The ``DynamicNode`` class wraps a data object or query into a ``Node`` object that creates children functions as they are called.
@@ -19,8 +19,6 @@ Suppose we wanted to create a five year operating statement with two years of hi
     >>> assumptions = (pd.DataFrame([[125, 135, 145], [9.5, 9.7, 9.9], [0.75, 0.74, 0.73]],
     ...                             index=['units', 'revenue_per_unit', 'opex_pct_rev'],
     ...                             columns=[2022, 2023, 2024]))
-
-.. code-block:: python
 
     >>> print(historicals)
               2020  2021
@@ -60,8 +58,6 @@ Concrete ``DynamicNode`` subclasses must implement two methods.
     ...         def child_func(self, year):
     ...             return self.df.loc[name].get(year, None)
     ...         return child_func
-
-.. code-block:: python
     
     >>> historicals = DataFrameNode(historicals)
     >>> historicals.children
@@ -89,8 +85,6 @@ It is possible to inform autocompleters about children by annotating the class. 
     ...     revenue: Callable
     ...     expenses: Callable
     ...     will_not_appear_in_children: Callable
-
-.. code-block:: python
 
     >>> dir(Historicals)  # autocompletion will appear for these attributes
     [..., 'expenses', ..., 'revenue', ..., 'will_not_appear_in_children']
@@ -133,8 +127,6 @@ The rest of the operating statement definition could be defined as follows.
 
     >>> pro_forma = (OperatingStatement(assumptions=Assumptions(assumptions),
     ...                                 historicals=Historicals(historicals)))
-
-.. code-block:: python
     
     >>> yrs = range(2020, 2025)
     >>> pd.DataFrame([pro_forma(y) for y in yrs], index=yrs, columns=pro_forma.names()).T

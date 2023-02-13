@@ -290,7 +290,7 @@ class DynamicNode(Node[_ParentType], metaclass=DynamicNodeMeta):
         name : str
             Name of requested child attribute
         """
-        raise NotImplementedError
+        raise NotImplementedError('Must provide concrete implementation of "child_factory".')
     
     def get_derived_children(self) -> Tuple[str]:
         """

@@ -7,7 +7,6 @@ User guide
 Introductions to get up and running with ``respread``.
 
 .. toctree::
-    :caption: Getting started
     :maxdepth: 2
 
     installation
