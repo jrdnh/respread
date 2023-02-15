@@ -4,9 +4,9 @@
 Organizing Nodes into trees
 ***************************
 
-``Node`` objects can be callables themselves by implementing the special `__call__ <https://docs.python.org/3/reference/datamodel.html#object.__call__>` method.
+``Node`` objects can be callables themselves by implementing the special `__call__ <https://docs.python.org/3/reference/datamodel.html#object.__call__>`_ method.
 
-Consider a model for an operating statement. It should return income for the period when it is called. Revenue and expense calculation are broken up into their own methods.
+Consider a node representing an operating statement model. The node should return income for the period when it is called. Revenue and expense calculations should be broken out into their own functions so they can be examined individually.
 
 .. code-block:: python
 
@@ -24,26 +24,27 @@ Consider a model for an operating statement. It should return income for the per
     >>> os(2020)
     50.0
 
-This model has a few problems.
+This simplistic model has a few problems.
 
-* Changing even a single line of the model requires redefining the entire class
+* Updateing even a single line requires redefining the entire class
 * As the revenue and expense calculations become more complex, so will the class definition
-* It is difficult to calculate and export the values from all the methods at the same time
+* It is difficult to examine revenue and expense sub-detail at the same time
 
-Since ``Node`` objects can be callable, the can be nested to create modular structures. 
+Since ``Node`` objects can be callable, they can be nested to create modular structures. 
 
-The revenue calculcations in ``OperatingStatement`` could be broken out into a separate node similar to the ``Revenue`` class from the previous section.
+The revenue calculcations in ``OperatingStatement`` could be broken out into a separate nodes similar to the ``Revenue`` class from the previous section.
 
 .. code-block:: python
-    :emphasize-lines: 2, 5, 8, 9, 12, 13, 14, 15, 16, 19
+    :emphasize-lines: 9, 10, 13, 14, 15, 16, 21, 22
 
     >>> class Revenue(Node):
     ...     @child
     ...     def product_revenue(self, year: int) -> float:
-    ...         return 100 * math.exp((year - 2020) * 0.08)
+    ...         return 100 * 1.08 ** (year - 2020)
     ...     @child
     ...     def service_revenue(self, year: int) -> float:
     ...         return self.product_revenue(year) * 0.25
+    ...     @child
     ...     def __call__(self, year: int) -> float:
     ...         return self.product_revenue(year) + self.service_revenue(year)
 
@@ -65,16 +66,16 @@ The revenue calculcations in ``OperatingStatement`` could be broken out into a s
     >>> os.revenue(2020)
     125.0
 
-In addition to abstracting the revenue model out of the operating statement model, inheriting from ``Node`` adds transparency to the structure. ``Node`` has several classes that make it easier to examine the structure and call multiple functions at the same time.
+In addition to abstracting the revenue calculations out of the operating statement model, inheriting from ``Node`` adds transparency to the structure. ``Node`` classes have several methods that make it easier to examine structure details.
 
-A collection of name-value pairs can be produced with the ``items(*args, **kwargs)`` or ``display(*args, **kwargs)`` functions. Both functions will call all children with the same function arguments.
+A collection of name-value pairs can be produced with the ``items(*args, **kwargs)`` or ``display(*args, **kwargs)`` functions. Both functions will call all children, including nested children, with the same function arguments.
 
 .. code-block:: python
 
     >>> os.items(2020)
-    ((('revenue', 'product_revenue'), 100.0), (('revenue', 'service_revenue'), 25.0), (('expense',), -62.5), (('__call__',), 62.5))
+    ((('revenue', 'product_revenue'), 100.0), (('revenue', 'service_revenue'), 25.0), (('revenue', '__call__'), 125.0), (('expenses',), -62.5), (('__call__',), 62.5))
     >>> os.display(2020)
-    (('revenue.product_revenue', 100.0), ('revenue.service_revenue', 25.0), ('expense', -62.5), ('__call__', 62.5))
+    (('revenue.product_revenue', 100.0), ('revenue.service_revenue', 25.0), ('revenue.__call__', 125.0), ('expenses', -62.5), ('__call__', 62.5))
 
 ``items`` returns tuples of attribute names with a separate element for each level of the hierarchy. For example, the product revenue function is nested under its revenue node parent, so it shows up as ``('revenue', 'product_revenue')``.
 
@@ -86,9 +87,9 @@ Collections of just the values or names can be retrieved as well.
 .. code-block:: python
 
     >>> os.names()
-    ('revenue.product_revenue', 'revenue.service_revenue', 'expense', '__call__')
+    ('revenue.product_revenue', 'revenue.service_revenue', 'revenue.__call__', 'expenses', '__call__')
     >>> os.values(2020)
-    (100.0, 25.0, -62.5, 62.5)
+    (100.0, 25.0, 125.0, -62.5, 62.5)
 
 Creating collections of values makes it easy to generate panels of detailed data. Using the operating statement model, the snippet below generates line-item projections from 2020 to 2025.
 
@@ -98,17 +99,15 @@ Creating collections of values makes it easy to generate panels of detailed data
     >>> years = range(2020, 2026)
 
     >>> pd.DataFrame([os.values(yr) for yr in years], columns=os.names(), index=years).T
-                            2020        2021  ...        2024        2025
-    revenue.product_revenue  100.0  108.328707  ...  137.712776  149.182470
-    revenue.service_revenue   25.0   27.082177  ...   34.428194   37.295617
-    revenue.__call__         125.0  135.410883  ...  172.140971  186.478087
-    expenses                 -62.5  -67.705442  ...  -86.070485  -93.239044
-    __call__                  62.5   67.705442  ...   86.070485   93.239044
+                            2020   2021    2022      2023        2024        2025
+    revenue.product_revenue  100.0  108.0  116.64  125.9712  136.048896  146.932808
+    revenue.service_revenue   25.0   27.0   29.16   31.4928   34.012224   36.733202
+    revenue.__call__         125.0  135.0  145.80  157.4640  170.061120  183.666010
+    expenses                 -62.5  -67.5  -72.90  -78.7320  -85.030560  -91.833005
+    __call__                  62.5   67.5   72.90   78.7320   85.030560   91.833005
 
 Elements appear based on their order in the node's ``children`` property. By default, children are added based on the order they appear in the class definition.
 
-You can change the order by re-assignment to the ``children`` property. In the ``OperatingStatement`` definition, the children are re-assigned with revenue added as the first child and removed as the last in the line ``self.children = ('revenue', *self.children[:-1])``.
-
-
+You can change the order by re-assignment to the ``children`` property. In the ``OperatingStatement`` class definition, the children are reordered so that revenue appears first. The reordering happens by reassignment in the line ``self.children = ('revenue', *self.children[:-1])``.
 
 The next section builds out a node class for operating expenses.
