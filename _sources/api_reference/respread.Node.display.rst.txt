@@ -1,0 +1,6 @@
+﻿respread.Node.display
+=====================
+
+.. currentmodule:: respread
+
+.. automethod:: Node.display

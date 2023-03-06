@@ -1,0 +1,38 @@
+﻿respread.Node
+=============
+
+.. currentmodule:: respread
+
+.. autoclass:: Node
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Node.__init__
+      ~Node.add_child
+      ~Node.attr_above
+      ~Node.cache_clear
+      ~Node.display
+      ~Node.items
+      ~Node.names
+      ~Node.set_parent
+      ~Node.values
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Node.children
+      ~Node.is_component
+      ~Node.root
+   
+   

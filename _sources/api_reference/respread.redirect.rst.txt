@@ -1,0 +1,6 @@
+﻿respread.redirect
+=================
+
+.. currentmodule:: respread
+
+.. autofunction:: redirect

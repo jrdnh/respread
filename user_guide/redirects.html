@@ -1,0 +1,550 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Redirecting calls &#8212; respread</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/redirects';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with data" href="working_with_data.html" />
+    <link rel="prev" title="Recursion limits and caching" href="recursion_limits.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">respread</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api_reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrdnh/respread" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api_reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrdnh/respread" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="getting_started.html">Getting started</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grouping_functions.html">Grouping functions with Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="organizing_nodes.html">Organizing Nodes into trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigating_nodes.html">Navigating nodes and type hinting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recursion_limits.html">Recursion limits and caching</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Redirecting calls</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_data.html">Working with data</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="getting_started.html" class="nav-link">Getting started</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Redirecting calls</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="redirecting-calls">
+<span id="redirects"></span><h1>Redirecting calls<a class="headerlink" href="#redirecting-calls" title="Permalink to this heading">#</a></h1>
+<p>Redirecting calls to another function and handling errors if the target function fails is a common pattern. For example, consider the original <code class="docutils literal notranslate"><span class="pre">Revenue</span></code> class from previous sections.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Revenue</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">product_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="mf">1.08</span> <span class="o">**</span> <span class="p">(</span><span class="n">year</span> <span class="o">-</span> <span class="mi">2020</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">service_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.25</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Rather than creating one node that handles both historical and projected revenue, it would better to separate historical revenue into its own node. This makes the <code class="docutils literal notranslate"><span class="pre">Revenue</span></code> node portable and allows clear separation of the data components from the modeling components.</p>
+<p>When a user requests revenue for a particular year, the model should ask the historical revenue node for revenue for that year. If the historical node has a valid data point, the historical response should be returned to the user. If the year is <em>after</em> the historical range, the historical node should raise an error indicating so. The revenue modeling node can then calculate and return the appropriate projection.</p>
+<p>Start by creating the historical data class. The custom exception type indicates an out of bound error to the right.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">AfterPeriodError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Historicals</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">hist_product_rev</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2019</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">2020</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="n">hist_service_rev</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2019</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">2020</span><span class="p">:</span> <span class="mi">24</span><span class="p">}</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">product_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hist_product_rev</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">AfterPeriodError</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist_product_rev</span><span class="p">[</span><span class="n">year</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">service_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hist_service_rev</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">AfterPeriodError</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist_service_rev</span><span class="p">[</span><span class="n">year</span><span class="p">]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">historicals</span> <span class="o">=</span> <span class="n">Historicals</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">historicals</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="mi">2020</span><span class="p">)</span>
+<span class="go">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">historicals</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="mi">2025</span><span class="p">)</span>
+<span class="go">__main__.AfterPeriodError</span>
+</pre></div>
+</div>
+<p>Requesting revenue for a year after the historical range will result in an <code class="docutils literal notranslate"><span class="pre">AfterPeriodError</span></code>. Requesting revenue for a year prior to the historical range or of an invalid argument type will result in a typical <code class="docutils literal notranslate"><span class="pre">KeyError</span></code>.</p>
+<p>Next, redefine new operating statement subclass that holds a node with historical data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">HistOperatingStatement</span><span class="p">(</span><span class="n">OperatingStatement</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">historicals</span><span class="p">:</span> <span class="n">Historicals</span><span class="p">,</span> <span class="n">revenue</span><span class="p">:</span> <span class="n">Revenue</span><span class="p">,</span> <span class="n">expenses</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">revenue</span><span class="p">,</span> <span class="n">expenses</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">historicals</span> <span class="o">=</span> <span class="n">historicals</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;historicals&#39;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Lastly, modify the <code class="docutils literal notranslate"><span class="pre">Revenue</span></code> class to forward calls to the historical data node.</p>
+<p><code class="docutils literal notranslate"><span class="pre">respread</span></code> allows users to redirect calls between nodes using the <code class="docutils literal notranslate"><span class="pre">&#64;redirect</span></code> decorator. This decorator forwards the call to the function at the specified path. If the target function raises an error caught by the decorator, then the decorated function is called.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">respread</span> <span class="kn">import</span> <span class="n">redirect</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Revenue</span><span class="p">(</span><span class="n">Node</span><span class="p">[</span><span class="n">HistOperatingStatement</span><span class="p">]):</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="hll"><span class="gp">... </span>    <span class="nd">@redirect</span><span class="p">((</span><span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="s1">&#39;historicals&#39;</span><span class="p">),</span> <span class="n">AfterPeriodError</span><span class="p">,</span> <span class="n">append_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span class="gp">... </span>    <span class="k">def</span> <span class="nf">product_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.08</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="hll"><span class="gp">... </span>    <span class="nd">@redirect</span><span class="p">((</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;historicals&#39;</span><span class="p">),</span> <span class="n">AfterPeriodError</span><span class="p">,</span> <span class="n">append_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span class="gp">... </span>    <span class="k">def</span> <span class="nf">service_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.25</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="nd">@child</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">product_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_revenue</span><span class="p">(</span><span class="n">year</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument to the <code class="docutils literal notranslate"><span class="pre">redirect</span></code> decorator is the path from the calling node to the target function. The path can either be relative (as in the decorator for product revenue) or absolute (as in the service revenue decorator, which starts at the root). Additionally, if <code class="docutils literal notranslate"><span class="pre">append_name=True</span></code> then the decorated function’s name will be appended to the path.</p>
+<p>The second argument is the exception types that should be caught. A tuple of exception types can be used if more than one exception type should be caught. If the target function raises an exception type caught by the decorator, the decorated function will be executed instead.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span> <span class="o">=</span> <span class="n">HistOperatingStatement</span><span class="p">(</span><span class="n">historicals</span><span class="p">,</span> <span class="n">Revenue</span><span class="p">(),</span> <span class="n">OperatingExpenses</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">revenue</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="mi">2019</span><span class="p">)</span>
+<span class="go">((&#39;product_revenue&#39;, 90), (&#39;service_revenue&#39;, 21), (&#39;__call__&#39;, 111))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">revenue</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="mi">2025</span><span class="p">)</span>
+<span class="go">((&#39;product_revenue&#39;, 146.93280768000005), (&#39;service_revenue&#39;, 36.73320192000001), (&#39;__call__&#39;, 183.66600960000005))</span>
+</pre></div>
+</div>
+<p>When the revenue functions are called, the request will be automatically routed to the correct function. Redirections are a good way to conditionally mirror fuctions and handle exceptions as they arise.</p>
+<hr class="docutils" />
+<p>Congratulations, this concludes the <strong>Getting started</strong> guide! Start using <code class="docutils literal notranslate"><span class="pre">respread</span></code> to create new models, <a class="reference external" href="https://github.com/jrdnh/respread/discussions">ask questions</a>, <a class="reference external" href="https://github.com/jrdnh/respread/issues">file issues</a>, or <a class="reference external" href="https://github.com/jrdnh/respread">contribute</a>!</p>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="recursion_limits.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Recursion limits and caching</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="working_with_data.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Working with data</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user_guide/redirects.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, jrdnh.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

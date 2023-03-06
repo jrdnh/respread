@@ -1,0 +1,6 @@
+﻿respread.Node.\_\_iter\_\_
+==========================
+
+.. currentmodule:: respread
+
+.. automethod:: Node.__iter__

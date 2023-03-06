@@ -1,0 +1,40 @@
+﻿respread.DynamicNode
+====================
+
+.. currentmodule:: respread
+
+.. autoclass:: DynamicNode
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DynamicNode.__init__
+      ~DynamicNode.add_child
+      ~DynamicNode.attr_above
+      ~DynamicNode.cache_clear
+      ~DynamicNode.child_factory
+      ~DynamicNode.display
+      ~DynamicNode.get_derived_children
+      ~DynamicNode.items
+      ~DynamicNode.names
+      ~DynamicNode.set_parent
+      ~DynamicNode.values
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DynamicNode.children
+      ~DynamicNode.is_component
+      ~DynamicNode.root
+   
+   

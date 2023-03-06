@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>respread.redirect &#8212; respread</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_reference/respread.redirect';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="General functions" href="functions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">respread</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrdnh/respread" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/jrdnh/respread" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="node.html">Node classes</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.html">respread.Node</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.DynamicNode.html">respread.DynamicNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.set_parent.html">respread.Node.set_parent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.children.html">respread.Node.children</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.add_child.html">respread.Node.add_child</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.root.html">respread.Node.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.attr_above.html">respread.Node.attr_above</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.DynamicNode.get_derived_children.html">respread.DynamicNode.get_derived_children</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.DynamicNode.child_factory.html">respread.DynamicNode.child_factory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.display.html">respread.Node.display</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.items.html">respread.Node.items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.values.html">respread.Node.values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.names.html">respread.Node.names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.__iter__.html">respread.Node.__iter__</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.Node.cache_clear.html">respread.Node.cache_clear</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="child.html">Child decorators</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="respread.cached_child.html">respread.cached_child</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.cached_child.id.html">respread.cached_child.id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="respread.cached_child.get_cached_func.html">respread.cached_child.get_cached_func</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="functions.html">General functions</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">respread.redirect</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="functions.html" class="nav-link">General functions</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">respread.redirect</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="respread-redirect">
+<h1>respread.redirect<a class="headerlink" href="#respread-redirect" title="Permalink to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="respread.redirect">
+<span class="sig-prename descclassname"><span class="pre">respread.</span></span><span class="sig-name descname"><span class="pre">redirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Exception</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#respread.redirect" title="Permalink to this definition">#</a></dt>
+<dd><p>Decorator that redirects calls to the component defined by the path.
+The wrapped function handles exceptions matching <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p>
+<p>The function’s <code class="docutils literal notranslate"><span class="pre">__name__</span></code> will  be appended to the path if <code class="docutils literal notranslate"><span class="pre">append_name</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> (default is <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p>
+<p>Multiple exceptions can be handled by providing a tuple of exceptions. The path is relative to <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">#</a></h2>
+<dl class="simple">
+<dt>path<span class="classifier">tuple[str]</span></dt><dd><p>Path to redirect call</p>
+</dd>
+<dt>error: Exception | tuple(Exception)</dt><dd><p>Exception(s) that will be handled by the wrapped function</p>
+</dd>
+<dt>append_name: bool, default False</dt><dd><p>Append the name of the wrapped function to the end of the path</p>
+</dd>
+</dl>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
+<p>Redirects are a way to provide a default value to a function if it raises and exception.</p>
+<p>Note that the path must be a tuple, even if there is only one element.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">UserPreferences</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">custom_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">themes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;John Doe&#39;</span><span class="p">:</span> <span class="s1">&#39;dark-mode&#39;</span><span class="p">}</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">themes</span><span class="p">[</span><span class="n">user</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="nd">@redirect</span><span class="p">((</span><span class="s1">&#39;custom_theme&#39;</span><span class="p">,),</span> <span class="ne">KeyError</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s1">&#39;light-mode&#39;</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UserPreferences</span><span class="p">()</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="s1">&#39;John Doe&#39;</span><span class="p">)</span>
+<span class="go">&#39;dark-mode&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">UserPreferences</span><span class="p">()</span><span class="o">.</span><span class="n">theme</span><span class="p">(</span><span class="s1">&#39;Adam Smith&#39;</span><span class="p">)</span>
+<span class="go">&#39;light-mode&#39;</span>
+</pre></div>
+</div>
+<p>Use redirects with custom exceptions to provide default values for only a subset of scenarios.</p>
+<p>The example below uses a custom exception type to indicate that the key error in out of bounds to the right of the historical data (in other words, the requested data is after the historical range).</p>
+<p>This pattern avoids inserting a conditional clause in <code class="docutils literal notranslate"><span class="pre">revenue</span></code> that has to test whether the year is in the historical range. It also avoids a recursion error if the year is before the historical range.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">AfterPeriodError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Revenue</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">historical_revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2020</span><span class="p">:</span> <span class="mi">100_000</span><span class="p">,</span> <span class="mi">2021</span><span class="p">:</span> <span class="mi">110_000</span><span class="p">}</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">AfterPeriodError</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">year</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="nd">@redirect</span><span class="p">((</span><span class="s1">&#39;historical_revenue&#39;</span><span class="p">,),</span> <span class="n">AfterPeriodError</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.08</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Revenue</span><span class="p">()</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>  <span class="c1"># in historical range</span>
+<span class="go">110000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Revenue</span><span class="p">()</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>  <span class="c1"># after historical range</span>
+<span class="go">118800.00000000001</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Revenue</span><span class="p">()</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>  <span class="c1"># before historical range</span>
+<span class="go">KeyError: 2000</span>
+</pre></div>
+</div>
+<p>The path is determined relative to <code class="docutils literal notranslate"><span class="pre">self</span></code>. Any attribute of <code class="docutils literal notranslate"><span class="pre">self</span></code>, including the root property, will be followed. Optionally, you can append the function’s <code class="docutils literal notranslate"><span class="pre">__name__</span></code> to the end of the path.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Historical</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2020</span><span class="p">:</span> <span class="mi">100_000</span><span class="p">,</span> <span class="mi">2021</span><span class="p">:</span> <span class="mi">110_000</span><span class="p">}</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">AfterPeriodError</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">year</span><span class="p">]</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">OperatingStatement</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># path will be pro_forma.historical.revenue</span>
+<span class="gp">... </span>    <span class="nd">@redirect</span><span class="p">((</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;historical&#39;</span><span class="p">),</span> <span class="n">AfterPeriodError</span><span class="p">,</span> <span class="n">append_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">revenue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.08</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pro_forma</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pro_forma</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="s1">&#39;historical&#39;</span><span class="p">,</span> <span class="n">Historical</span><span class="p">()</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="n">pro_forma</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pro_forma</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="s1">&#39;operating_statement&#39;</span><span class="p">,</span> <span class="n">OperatingStatement</span><span class="p">()</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="n">pro_forma</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pro_forma</span><span class="o">.</span><span class="n">operating_statement</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
+<span class="go">110000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pro_forma</span><span class="o">.</span><span class="n">operating_statement</span><span class="o">.</span><span class="n">revenue</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="go">118800.00000000001</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="functions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">General functions</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#respread.redirect"><code class="docutils literal notranslate"><span class="pre">redirect()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/api_reference/respread.redirect.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner"></div>
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, jrdnh.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://sphinx-doc.org/">Sphinx</a> 5.3.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

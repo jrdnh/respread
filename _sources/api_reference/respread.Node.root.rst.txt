@@ -1,0 +1,6 @@
+﻿respread.Node.root
+==================
+
+.. currentmodule:: respread
+
+.. autoproperty:: Node.root
