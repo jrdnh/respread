@@ -27,6 +27,7 @@ def nested_node() -> Node:
     class GroupB(Node):
         def __init__(self, childa: GroupA, parent: Node | None = None) -> None:
             super().__init__(parent, children={'childa': childa})
+            self.childa = childa.set_parent(self)
         @cached_child
         def childb_func(self, num):
             return f'childb_func: {num}'
@@ -52,15 +53,12 @@ def test_init_parent():
     assert node.parent is parent
 
 def test_init_children():
-    # children added in init will have their parent set to the initializing 
-    # Node (if child has a `parent` attribute)
     non_node_child = SimpleNamespace()
     node_child = Node()
     node = Node(children={'non_node_child': non_node_child, 'node_child': node_child})
     assert node.children == ('non_node_child', 'node_child')
     assert node.non_node_child is non_node_child
     assert node.node_child is node_child
-    assert node_child.parent is node
 
 def test_add_child_to_children():
     child_defined_outside_class = SimpleNamespace()

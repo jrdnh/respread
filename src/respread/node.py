@@ -1,14 +1,15 @@
 from __future__ import annotations
 from types import MethodType
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable
 
 from respread.child import _CHILD_CACHE, ComponentType, is_component
 
 from typing import Generic, TypeVar
+_RootType = TypeVar('_RootType', bound='Node', covariant=True)
 _ParentType = TypeVar('_ParentType', bound='Node', covariant=True)
 
 
-class Node(ComponentType, Generic[_ParentType]):
+class Node(ComponentType, Generic[_RootType, _ParentType]):
     """
     Composite container type for children callables.
     
@@ -22,7 +23,7 @@ class Node(ComponentType, Generic[_ParentType]):
     `Node` objects are of type `ComponentType` themselves and can be nested to create callable tree structures.
     """
     
-    def __init__(self, parent: _ParentType | None = None, children: Dict[str, Callable] | None = None) -> None:
+    def __init__(self, parent: _ParentType | None = None, children: dict[str, Callable] | None = None) -> None:
         super().__init__()
         setattr(self, _CHILD_CACHE, {})
         self.parent = parent
@@ -30,13 +31,11 @@ class Node(ComponentType, Generic[_ParentType]):
         if children:
             for name, child_ in children.items():
                 self.add_child(name, child_)
-                if hasattr(child_, 'parent'):
-                    child_.parent = self
         self._add_child_to_children()
     
     # ---------------------------------
     # Manage children and parents
-    def set_parent(self, parent: Node | None):
+    def set_parent(self, parent: _ParentType | None):
         """Set parent and return self."""
         self.parent = parent
         return self
@@ -56,7 +55,7 @@ class Node(ComponentType, Generic[_ParentType]):
         """Managed property with tuple of children attributes."""
         return self._children
     
-    def _set_children(self, new_children: Tuple[str]):
+    def _set_children(self, new_children: tuple[str]):
         for child_ in new_children:
             if not hasattr(self, child_):
                 raise ValueError(f"Cannot find attribute '{child_}' for object {self}")
@@ -99,7 +98,7 @@ class Node(ComponentType, Generic[_ParentType]):
         return super().__delattr__(__name)
     
     @property
-    def root(self):
+    def root(self) -> _RootType:
         """Calculated property for the root node of the structure."""
         if self.parent is not None:
             return self.parent.root
@@ -120,7 +119,7 @@ class Node(ComponentType, Generic[_ParentType]):
     
     # ---------------------------------
     # Callable
-    def display(self, *args: Any, **kwds: Any) -> Tuple[str, Any]:
+    def display(self, *args: Any, **kwds: Any) -> tuple[str, Any]:
         """
         Tuple of ``(name, value)`` for leaf functionswhere the name is the child path concatenated by periods and the 
         value is the leaf value with arguments propogated. 
@@ -137,11 +136,11 @@ class Node(ComponentType, Generic[_ParentType]):
                 results.append(('.'.join(name), None))
         return tuple(results)
     
-    def items(self, *args: Any, **kwds: Any) -> Tuple:
+    def items(self, *args: Any, **kwds: Any) -> tuple:
         """Tuple of ``((child_names,), result)`` pairs with the result of calling all children in or below the node."""
         return tuple((name, child_(*args, **kwds)) for name, child_ in iter(self))
     
-    def values(self, *args: Any, **kwds: Any) -> Tuple:
+    def values(self, *args: Any, **kwds: Any) -> tuple:
         """Tuple of values of leaf function results. Args and keywords propogated to all leafs."""
         return tuple(child_(*args, **kwds) for name, child_ in iter(self))
     
@@ -197,7 +196,7 @@ class DynamicNodeMeta(type):
         return sorted(fields)
 
 
-class DynamicNode(Node[_ParentType], metaclass=DynamicNodeMeta):
+class DynamicNode(Node[_RootType, _ParentType], metaclass=DynamicNodeMeta):
     """
     Node subclass that creates children as they are accessed.
     
@@ -292,7 +291,7 @@ class DynamicNode(Node[_ParentType], metaclass=DynamicNodeMeta):
         """
         raise NotImplementedError('Must provide concrete implementation of "child_factory".')
     
-    def get_derived_children(self) -> Tuple[str]:
+    def get_derived_children(self) -> tuple[str]:
         """
         Names of derived children attributes.
         
